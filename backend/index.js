@@ -9,6 +9,7 @@ const io = socketIO(http, {
         methods: ['GET', 'POST']
     }
 });
+const gpt = require('./gpt.js')
 
 app.use(cors());
 
@@ -38,3 +39,9 @@ socket.on('disconnect', () => {
 http.listen(3000, () => {
 console.log(`Server listening on port ${PORT}`);
 });
+
+// Test for generating questions
+// const questionAnswerPair = gpt.generateQuestion("Greek history")
+
+// Test for similar strings
+console.log(gpt.similarStrings('he --..l-- .. lo     ', 'hello'))
