@@ -28,6 +28,31 @@ const io = socketIO(http, {
 
 */
 
+// as clients join, give them an identifier on the front and back and add it here
+let users = [];
+
+
+// as they buzz, add to the queue
+let buzzing_queue = [];
+
+// when the length of buzzing_queue changes, fire an event (allow guess or something). 
+
+
+// "Next Question" event: tell the server to give the clients a question (scrolling)
+
+// "Buzz" event: enqueue a "buzz," which should allow the user to submit a guess, and stop the scrolling
+
+// "Stop Question" event: stop the question from scrolling
+
+// "Start Timer" event: have the timer for guesses going
+
+// "Reset Timer" event: in the case that the person is wrong
+
+// "Guess Events"
+
+
+
+
 app.use(cors());
 
 const PORT = 3000;
@@ -45,11 +70,14 @@ console.log('New client connected');
     });
 
     socket.on('buzz', (payload, roomCode) => {
-
+       
     })
 
-    
 
+    socket.io('nextQuestion', () => {
+        
+    })
+    
 
     socket.on('message', (payload, roomCode) => {
         io.to(roomCode).emit('message', payload);

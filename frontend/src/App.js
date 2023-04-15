@@ -17,6 +17,8 @@ function App() {
   const [newMessage, setNewMessage] = useState('');
   const [newGuess, setNewGuess] = useState('');
 
+  const [questions, setQuestions] = useState([]);
+
   const joinRoom = () => {
     console.log("Joined room...!");
     socket.emit('joinRoom', roomCode);
@@ -27,11 +29,17 @@ function App() {
 
   }, [])
 
+  const nextQuestion = () => {
+    socket.emit("nextQuestion");
+  }
+
   useEffect(() => {
     socket.on('message', (message) => {
       setMessages([...messages, message]);
     });
   }, [messages]);
+
+
 
 
 
