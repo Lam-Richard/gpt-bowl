@@ -23,7 +23,8 @@ async function getQuestion() {
         return {
             question: q_a.question,
             answer: q_a.answer,
-            message_type: "q_a"
+            message_type: "q_a",
+            buzzes: []
         }
     } else {
         let data = await firestore.getData();
@@ -32,7 +33,8 @@ async function getQuestion() {
         return {
             question: q_a.question,
             answer: q_a.answer,
-            message_type: "q_a"
+            message_type: "q_a",
+            buzzes: []
         }
     }
 }
@@ -73,7 +75,7 @@ let completedQuestions = []
 let already_timing = false;
 
 // Create a proxy for the array
-const buzzingQueue = new Proxy([], {
+let buzzingQueue = new Proxy([], {
     // Trap for set
     set(target, prop, value) {
       // Add the item to the array
@@ -175,7 +177,7 @@ io.on('connection', (socket) => {
             console.log("Answer is wrong")
         }
 
-        socket.emit("result", {id: payload.id, isCorrect: isCorrect})
+        socket.emit("confirmGuess", {id: payload.id, guess: guess, isCorrect: isCorrect})
     })
     
 });

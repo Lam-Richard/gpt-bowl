@@ -29,14 +29,14 @@ function TypingAnimation({ text, isPaused }) {
   return <div>{typedText}</div>;
 }
 
-function QuizBowlQuestion({ question, scroll, setScroll, time, handleTimerChange }) {
+function QuizBowlQuestion({ question, scroll, setScroll }) {
   const [showQuestion, setShowQuestion] = React.useState(false);
-  const handleBuzz = () => {
-    setScroll(!scroll);
-    console.log('buzzed');
-    console.log('scroll:', scroll);
-    handleTimerChange(time);
-  }
+  // const handleBuzz = () => {
+  //   setScroll(!scroll);
+  //   console.log('buzzed');
+  //   console.log('scroll:', scroll);
+  //   handleTimerChange(time);
+  // }
 
   const handleShowQuestion = () => {
     if (showQuestion === false) {
@@ -65,10 +65,9 @@ function QuizBowlQuestion({ question, scroll, setScroll, time, handleTimerChange
         <CardContent style={{ fontFamily: 'Nunito'}}>
           <h2>Question:</h2>
           {showQuestion ? <div>{question}</div> : <TypingAnimation text={question} isPaused={!scroll} />}
-          {scroll ? <Timer time={time} IsPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
         </CardContent>
       </Card>
-      <Button onClick={handleBuzz}>Buzz</Button>
+      {/* <Button onClick={handleBuzz}>Buzz</Button> */}
       <Button onClick={handleShowQuestion}>Show Question</Button>
     </div>
   );
