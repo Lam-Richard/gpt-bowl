@@ -40,6 +40,7 @@ app.get('/', (req, res) => {
 
 // as clients join, give them an identifier on the front and back and add it here
 let users = {};
+let completedQuestions = []
 let already_timing = false;
 
 // Create a proxy for the array
@@ -85,20 +86,14 @@ const buzzingQueue = new Proxy([], {
         // Pop the first item from the array when the timer completes
         console.log("Start scroll!!!")
         io.to(users[buzzingQueue.slice(-1)]).emit("startScroll", {message_type: "startScroll", id: buzzingQueue.slice(-1)})
-        
+
         buzzingQueue.pop();
-
-
         console.log("Queue at timer end: ", buzzingQueue);
-
       }
     }, 1000);
   }
   
 
-  
-
-  
 io.on('connection', (socket) => {
 
     console.log("A new client has connected to the server.")
@@ -114,6 +109,15 @@ io.on('connection', (socket) => {
 
     socket.on('getNextQuestion', async (payload) => {
         let q_a = await gpt.generateQuestion("Science");
+
+        // Dummy question & answer to avoid calling GPT API
+        // let q_a = {
+        //     question: "Lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor ",
+        //     answer: "Lorem"
+        // }
+
+        completedQuestions.push(q_a)
+
         io.to(payload.roomCode).emit('postNextQuestion', q_a);
     })
 
@@ -127,17 +131,30 @@ io.on('connection', (socket) => {
         console.log('Client disconnected');
     });
 
+    socket.on('makeGuess', (payload) => {
+        const guess = payload.guess
+        const correct = completedQuestions.slice(-1)[0].answer
+        
+        const isCorrect = gpt.similarStrings(correct, guess)
+        if (isCorrect) {
+            console.log("Answer is correct")
+        }
+        else {
+            console.log("Answer is wrong")
+        }
+
+        socket.emit("result", {id: payload.id, isCorrect: isCorrect})
+    })
     
-
-
 });
 
 http.listen(3000, () => {
-console.log(`Server listening on port ${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });
+
 
 // Test for generating questions
 // const questionAnswerPair = gpt.generateQuestion("Greek history")
 
 // Test for similar strings
-console.log(gpt.similarStrings('he --..l-- .. lo     ', 'hello'))
+// console.log(gpt.similarStrings('he --..l-- .. lo     ', 'hello'))

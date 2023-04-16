@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import openSocket from 'socket.io-client';
 import "./App.css";
-import QuizBowlQuestion from './Components/QuizBowlQuestion';
+import QuizBowlQuestion from './Components/QuizBowlQuestion'
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 
@@ -27,6 +27,8 @@ function App() {
   const [canGuess, setCanGuess] = useState(false);
   const [timer, setTimer] = useState(10);
   const [scroll, setScroll] = useState(true);
+  const [correct, setCorrect] = useState(false);
+  const [answered, setAnswered] = useState(false);
 
   const joinRoom = () => {
     console.log(`${id} Joined room ${roomCode}...!`);
@@ -58,6 +60,20 @@ function App() {
     })
   }, [canGuess])
 
+  useEffect(() => {
+    socket.on('result', (payload) => {
+      console.log("isCorrect", payload.isCorrect)
+      if (payload.isCorrect) {
+        setCorrect(true)
+        console.log("Set to Correct")
+      }
+      else {
+        setCorrect(false)
+        console.log("Set to Wrong")
+      }
+    })
+  })
+
 
   useEffect(() => {
     if (canGuess) {
@@ -75,8 +91,9 @@ function App() {
     }
   }, [canGuess, timer])
 
-
-  // useEffect(( ) => { console.log("Timer: ", timer) }, [timer])
+  useEffect(() => {
+    console.log("Timer useEffect: ", timer);
+  }, [timer])
 
   useEffect(() => {
     socket.on('postNextQuestion', (q_a) => {
@@ -125,31 +142,10 @@ function App() {
           </button>
 
 
-  //   </div>
-  // );
-
-  const [timer, setTimer] = useState(30);
-
-  const handleTimerChange = (newTimer) => {
-    setTimer(newTimer);
-  }
-
-  return (
-    // <div className="grid-container">
-    //   <div className="main">
-    //     <div className="guessbar">
-    //       <div>Guess: &nbsp;</div>
-          <div>
-            <QuizBowlQuestion
-              question={"What is the capital of France? Hint: it has the Eiffel Tower."}
-              time={timer}
-              handleTimerChange={handleTimerChange}
-            />
-
-          <input 
+          <input
             value={guess} 
             onEnter={() => setGuess('')} 
-            onChange={(e) => {setGuess(e.target.value)}} 
+            onChange={(e) => {setGuess(e.target.value)}}
             >
           </input>
 
@@ -157,7 +153,9 @@ function App() {
             style={{height: "25px", width: "50px"}}
             onClick={() => {
               if (canGuess) {
+                setAnswered(true)
                 console.log("Send my Guess in! This should be a key listener though...");
+                socket.emit('makeGuess', {id: id, guess: guess})
               } else {
                 console.log("Can't Guess")
               }
@@ -175,6 +173,15 @@ function App() {
         </div>
         {/* Log should be scrollable in the future */}
         <div className="log">
+        <div style={{height: "25px", display: "flex", justifyContent: "center", marginTop: "15px"}}>
+            {answered ?
+              (correct ? 
+                <h2>Correct!</h2> : 
+                <h2>Wrong</h2>) :
+              ""
+            }
+            
+        </div>
           {questions.map(q_a =>
             <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll} />
           )}
@@ -187,4 +194,3 @@ function App() {
 }
 
 export default App;
-
