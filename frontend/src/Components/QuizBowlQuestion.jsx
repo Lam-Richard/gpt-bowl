@@ -61,8 +61,8 @@ function QuizBowlQuestion({ question, scroll, setScroll, time, handleTimerChange
 
   return (
     <div>
-      <Card variant="outlined">
-        <CardContent>
+      <Card className="active-card" variant="outlined" sx={{ borderRadius: '16px' }} style={{ boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)' }}>
+        <CardContent style={{ fontFamily: 'Nunito'}}>
           <h2>Question:</h2>
           {showQuestion ? <div>{question}</div> : <TypingAnimation text={question} isPaused={!scroll} />}
           {scroll ? <Timer time={time} IsPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion time={7} isPaused={!scroll} setIsPaused={setScroll}/>}

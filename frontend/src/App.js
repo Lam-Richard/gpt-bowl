@@ -5,6 +5,8 @@ import QuizBowlQuestion from './Components/QuizBowlQuestion'
 import Heading from './Components/Heading'
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 
 
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -195,7 +197,7 @@ function App() {
                 return <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}  time={timer} handleTimerChange={handleTimerChange}/>
               } else {
                 // Style this differently
-                return <div className="content">{q_a.question}</div>
+                return <Card className="grayed-out gray-card" style={{ fontFamily: 'Nunito'}}><CardContent>{q_a.question} <br/><br/> {q_a.answer}</CardContent></Card>
               }
             }
           )}
