@@ -97,14 +97,15 @@ function App() {
     console.log("Current Buzzes: ", currentBuzzes);
   }, [currentBuzzes])
 
+  // Bug has nothing to do with this because it still goes when i turn it off
   useEffect(() => {
     socket.on("timer", (payload) => {
-      setTimer(10 - payload.time)
+      setTimer(10 - payload.time);
       if (timer == 0) {
         setCanGuess(false);
       }
     })
-  }, [canGuess, timer])
+  }, [])
 
   useEffect(() => {
     console.log("Timer useEffect: ", timer);
@@ -114,8 +115,9 @@ function App() {
     socket.on('postNextQuestion', (q_a) => {
       setQuestions([q_a, ...questions]);
       setCurrentBuzzes([]);
+      setTimer(20);
     })
-  }, [questions, currentBuzzes])
+  }, [questions, currentBuzzes, timer])
 
   useEffect(() => {
       socket.on('startScroll', (payload) => {
@@ -139,10 +141,12 @@ function App() {
   return (
 
     <div className="grid-container">
-      {scroll ? <Timer time={timer} IsPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
       <div className="main">
+
+
       <Heading/>
       {/* {scroll ? <Timer time={timer} IsPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion time={7} isPaused={!scroll} setIsPaused={setScroll}/>} */}
+
         <div className="guessbar">
           <Button 
             style={{height: "25px", width: "50px"}}
@@ -198,6 +202,9 @@ function App() {
          
 
         </div>
+
+
+
         {/* Log should be scrollable in the future */}
         <div className="log">
         <div style={{height: "25px", display: "flex", justifyContent: "center", marginTop: "15px"}}>
@@ -216,12 +223,14 @@ function App() {
 
                 return ( 
                   <div>
-                    <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}  time={timer} handleTimerChange={handleTimerChange}/>
+                    {scroll ? <Timer questions={questions} time={timer} isPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion questions={questions} time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
+                    <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}/>
                     {currentBuzzes.map(buzz => <div>{buzz.message}</div>)}
                   </div>
                 )
               } else {
                 // Style this differently
+                
                 return <Card className="grayed-out gray-card" style={{ fontFamily: 'Nunito'}}><CardContent>{q_a.question} <br/><br/> {q_a.answer}</CardContent></Card>
               }
             }
@@ -229,6 +238,9 @@ function App() {
         </div>
         
       </div>
+
+
+
       <div className="side"></div>
     </div>
   )
