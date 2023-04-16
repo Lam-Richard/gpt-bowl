@@ -77,21 +77,15 @@ function App() {
   })
 
 
+
   useEffect(() => {
-    if (canGuess) {
-      const interval = setInterval(() => {
-        setTimer(timer - 1);
-        if (timer == 0) {
-          clearInterval(interval);
-          setCanGuess(false);
-        }
-      }, 1000);
-      return;
-    } else if (timer != 10) {
-      setTimer(10);
-      return;
-    }
-  }, [canGuess, timer])
+    socket.on("timer", (payload) => {
+      setTimer(10 - payload.time)
+      if (timer == 0) {
+        setCanGuess(false);
+      }
+    })
+  })
 
   useEffect(() => {
     console.log("Timer useEffect: ", timer);
