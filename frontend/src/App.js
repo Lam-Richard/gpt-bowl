@@ -95,6 +95,7 @@ function App() {
       console.log("isCorrect", payload.isCorrect)
       if (payload.isCorrect) {
         setCorrect(true)
+        // awardPoints(payload.id);
         console.log("Set to Correct")
       }
       else {
@@ -104,15 +105,24 @@ function App() {
 
       setCurrentBuzzes([{message: `${payload.id}: ${payload.guess} (${payload.isCorrect})`}, ...currentBuzzes]);
     })
-  }, [correct, currentBuzzes])
+  }, [correct, currentBuzzes, canGuess])
 
   useEffect(() => {
     if (correct) {
+      setTimer(0);
       nextQuestion({roomCode: roomCode});
       setCorrect(false);
     }
   }, [correct])
 
+
+  // const awardPoints = (id) => {
+  //   const userIdx = users.findIndex(user => user[id] == id);
+  //   const updatedUser = { ...users[userIdx], 'points': users[userIdx]['points'] + 10 };
+  //   const updatedUsers = [...users];
+  //   updatedUsers[userIdx] = updatedUser;
+  //   setUsers(updatedUsers);
+  // }
 
   useEffect(() => {
     console.log("Current Buzzes: ", currentBuzzes);
@@ -207,7 +217,8 @@ function App() {
               if (canGuess) {
                 setAnswered(true)
                 console.log("Send my Guess in! This should be a key listener though...");
-                socket.emit('makeGuess', {id: id, guess: guess})
+                socket.emit('makeGuess', {id: id, guess: guess});
+                setGuess('');
               } else {
                 console.log("Can't Guess")
               }
@@ -259,7 +270,7 @@ function App() {
           <Card sx={{ textAlign: 'center', borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomLeftRadius: 25, borderBottomRightRadius: 25 }}>
             <CardContent>
               <ol>
-                {users.map(user => <li>{user}</li>)}
+                {users.map(user => <li>{user.id}</li>)}
               </ol>
             </CardContent>
           </Card>

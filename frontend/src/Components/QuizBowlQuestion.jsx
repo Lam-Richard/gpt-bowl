@@ -3,6 +3,7 @@ import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 
+
 function TypingAnimation({ text, isPaused }) {
   const [typedText, setTypedText] = React.useState("");
   const currentIndexRef = React.useRef(0);
@@ -19,7 +20,7 @@ function TypingAnimation({ text, isPaused }) {
       setTypedText(text.substring(0, i));
       i++;
       currentIndexRef.current = i;
-    }, 30);
+    }, 100);
 
     return () => clearInterval(intervalId);
   }, [isPaused, text]);
@@ -66,7 +67,7 @@ function QuizBowlQuestion({ question, scroll, setScroll }) {
         </CardContent>
       </Card>
       {/* <Button onClick={handleBuzz}>Buzz</Button> */}
-      <Button onClick={handleShowQuestion}>Show Question</Button>
+      <br></br>
     </div>
   );
 }

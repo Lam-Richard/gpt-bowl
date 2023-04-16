@@ -57,7 +57,9 @@ let completedQuestions = []
 let already_timing = false;
 
 // Create a proxy for the array
-let buzzingQueue = new Proxy([], {
+let buzzingQueue = 
+
+    new Proxy([], {
     // Trap for set
     set(target, prop, value) {
       // Add the item to the array
@@ -116,12 +118,13 @@ io.on('connection', (socket) => {
     console.log("A new client has connected to the server.")
 
     socket.on('joinRoom', (payload) => {
-        socket.join(payload.roomCode);
+        socket.join(200);
         // For later use...!
-        users[payload.id] = payload.roomCode;
+        users[payload.id] = {'roomCode': 200, 'points': 0, 'id': payload.id};
+
 
         console.log("Users in the room: ", payload.id);
-        console.log(`User ${payload.id} joined room ${payload.roomCode}`);
+        console.log(`User ${payload.id} joined room ${200}`);
     });
 
     socket.on('getNextQuestion', async (payload) => {
@@ -136,7 +139,7 @@ io.on('connection', (socket) => {
 
         completedQuestions.push(q_a)
 
-        io.to(payload.roomCode).emit('postNextQuestion', q_a);
+        io.to(200).emit('postNextQuestion', q_a);
     })
 
     socket.on('sendBuzz', (payload) => {
@@ -147,9 +150,12 @@ io.on('connection', (socket) => {
 
 
     socket.on('getUsers', (payload) => {
+        console.log("USERS: ", users);
         let all_users = Object.keys(users)
         console.log("All Users: ", all_users);
-        io.to(payload.roomCode).emit('receiveUsers', {users: all_users.filter(user => users[user] == payload.roomCode)})
+        // console.log("TRY: ", all_users.filter(user => {return {[user]: users[user]['roomCode'] == 200}}).map(id => users[id]));
+        console.log("TRY:: ", all_users.filter(user => users[user]['roomCode'] == 200).map(id => users[id]))
+        io.to(200).emit('receiveUsers', {users: all_users.filter(user => users[user]['roomCode'] == 200).map(id => users[id])})
     })
 
     socket.on('disconnect', () => {
@@ -164,11 +170,41 @@ io.on('connection', (socket) => {
         const isCorrect = gpt.similarStrings(correct, guess)
         if (isCorrect) {
             console.log("Answer is correct")
+            buzzingQueue = new Proxy([], {
+                // Trap for set
+                set(target, prop, value) {
+                  // Add the item to the array
+                  Reflect.set(target, prop, value);
+                  // If the array is not empty, start the timer
+                  if (target.length > 0 && already_timing == false) {
+                    already_timing = true;
+                    console.log(`Emitting to room ${users[buzzingQueue.slice(-1)]}`)
+                    io.to(users[buzzingQueue.slice(-1)]).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
+                    startTimer();
+                  }
+                  return true;
+                },
+                // Trap for deleteProperty
+                deleteProperty(target, prop) {
+                  // Delete the property from the array
+                  Reflect.deleteProperty(target, prop);
+                  // If the array is not empty, start the timer
+                  if (target.length > 1) {
+                    already_timing = true;
+                    io.to(users[buzzingQueue.slice(-1)]).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
+                    startTimer();
+                  } else {
+                    already_timing = false;
+                  }
+                  return true;
+                },
+              });
+
         }
         else {
             console.log("Answer is wrong")
         }
-
+        
         socket.emit("confirmGuess", {id: payload.id, guess: guess, isCorrect: isCorrect})
     })
     
