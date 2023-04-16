@@ -17,7 +17,7 @@ const firestore = require('./firebase.js');
 async function getQuestion() {
     let coin = Math.random();
     console.log("coin: ", coin);
-    if (coin > 0.3) {
+    if (coin > 1) {
         let q_a = await gpt.generateQuestion("Science");
         await firestore.writeData(q_a.question, q_a.answer);
         return {
@@ -143,10 +143,10 @@ io.on('connection', (socket) => {
 
 
         // Dummy question & answer to avoid calling GPT API
-        let q_a = {
-            question: "The first step in this process can be further broken down into leptotene, zygotene, and pachytene phases. A common problem during this process is nondisjunction, which leads to conditions such as Klinefelter's Syndrome and Down Syndrome. This process involves two instances of prophase, metaphase, anaphase, and telophase. For 10 points, name this process used to create haploid cells, such as sperm and eggs.",
-            answer: "Meiosis"
-        }
+        // let q_a = {
+        //     question: "The first step in this process can be further broken down into leptotene, zygotene, and pachytene phases. A common problem during this process is nondisjunction, which leads to conditions such as Klinefelter's Syndrome and Down Syndrome. This process involves two instances of prophase, metaphase, anaphase, and telophase. For 10 points, name this process used to create haploid cells, such as sperm and eggs.",
+        //     answer: "Meiosis"
+        // }
 
         completedQuestions.push(q_a)
 

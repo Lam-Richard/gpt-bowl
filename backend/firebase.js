@@ -35,8 +35,4 @@ async function writeData(question, answer) {
     return;
 }
 
-getData().then(data => {
-    console.log(data);
-})
-
 module.exports = { writeData, getData }
