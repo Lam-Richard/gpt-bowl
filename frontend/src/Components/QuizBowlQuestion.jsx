@@ -19,7 +19,7 @@ function TypingAnimation({ text, isPaused }) {
       setTypedText(text.substring(0, i));
       i++;
       currentIndexRef.current = i;
-    }, 100);
+    }, 30);
 
     return () => clearInterval(intervalId);
   }, [isPaused, text]);

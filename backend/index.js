@@ -13,6 +13,8 @@ const gpt = require('./gpt.js');
 
 const firestore = require('./firebase.js');
 
+const QUESTION_DURATION = 20
+let paused = false
 
 async function getQuestion() {
     let coin = Math.random();
@@ -111,17 +113,19 @@ let buzzingQueue = new Proxy([], {
     console.log("Queue at timer start: ", buzzingQueue);
     const intervalId = setInterval(() => {
       console.log(`Count: ${count}`);
-      count++;
-      io.to(users[buzzingQueue.slice(-1)]).emit("timer", {time: count})
-      if (count >= 10) {
-        clearInterval(intervalId);
-        // Pop the first item from the array when the timer completes
-        console.log("Start scroll!!!")
-        io.to(users[buzzingQueue.slice(-1)]).emit("timer", {time: 0})
-        io.to(users[buzzingQueue.slice(-1)]).emit("startScroll", {message_type: "startScroll", id: buzzingQueue.slice(-1)})
-
-        buzzingQueue.pop();
-        console.log("Queue at timer end: ", buzzingQueue);
+      if (!paused) {
+        count++;
+        io.to(users[buzzingQueue.slice(-1)]).emit("timer", {time: count})
+        if (count >= QUESTION_DURATION) {
+          clearInterval(intervalId);
+          // Pop the first item from the array when the timer completes
+          console.log("Start scroll!!!")
+          io.to(users[buzzingQueue.slice(-1)]).emit("timer", {time: 0})
+          io.to(users[buzzingQueue.slice(-1)]).emit("startScroll", {message_type: "startScroll", id: buzzingQueue.slice(-1)})
+  
+          buzzingQueue.pop();
+          console.log("Queue at timer end: ", buzzingQueue);
+      }
       }
     }, 1000);
   }
@@ -144,7 +148,7 @@ io.on('connection', (socket) => {
         let q_a = await getQuestion();
 
 
-        // // Dummy question & answer to avoid calling GPT API
+        // Dummy question & answer to avoid calling GPT API
         // let q_a = {
         //     question: "The first step in this process can be further broken down into leptotene, zygotene, and pachytene phases. A common problem during this process is nondisjunction, which leads to conditions such as Klinefelter's Syndrome and Down Syndrome. This process involves two instances of prophase, metaphase, anaphase, and telophase. For 10 points, name this process used to create haploid cells, such as sperm and eggs.",
         //     answer: "Meiosis"
@@ -158,6 +162,7 @@ io.on('connection', (socket) => {
     socket.on('sendBuzz', (payload) => {
         // This can be anything...?
         buzzingQueue.unshift(payload.id);
+        paused = true
     })
 
 
@@ -174,6 +179,7 @@ io.on('connection', (socket) => {
     socket.on('makeGuess', (payload) => {
         const guess = payload.guess
         const correct = completedQuestions.slice(-1)[0].answer
+        paused = false
         
         const isCorrect = gpt.similarStrings(correct, guess)
         if (isCorrect) {

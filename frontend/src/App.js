@@ -15,6 +15,7 @@ import TimerQuestion from './Components/TimerQuestion';
 
 // Import the functions you need from the SDKs you need
 
+const QUESTION_DURATION = 20;
 
 function generateRandomString(length) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -32,6 +33,7 @@ function App() {
 
   const roomCode = 200;
   const [guess, setGuess] = useState('');
+  const [users, setUsers] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [canGuess, setCanGuess] = useState(false);
   const [timer, setTimer] = useState(20);
@@ -53,7 +55,20 @@ function App() {
 
   useEffect(() => {
     joinRoom();
+    getUsers();
+
+    socket.on('receiveUsers', (payload) => {
+      setUsers(payload.users);
+    })
   }, []);
+
+  const getUsers = () => {
+    socket.emit('getUsers', {roomCode: roomCode});
+  }
+
+  useEffect(() => {
+    console.log("Users: ", users);
+  }, [users])
 
   useEffect(() => {
     socket.on('confirmBuzz', (payload) =>  {
@@ -100,7 +115,7 @@ function App() {
   // Bug has nothing to do with this because it still goes when i turn it off
   useEffect(() => {
     socket.on("timer", (payload) => {
-      setTimer(10 - payload.time);
+      setTimer(QUESTION_DURATION - payload.time);
       if (timer == 0) {
         setCanGuess(false);
       }
@@ -241,7 +256,12 @@ function App() {
 
 
 
-      <div className="side"></div>
+      <div className="side">
+          <div>Users in the Room: </div>
+          <ol>
+            {users.map(user => <li>{user}</li>)}
+          </ol>
+      </div>
     </div>
   )
 }
