@@ -11,15 +11,8 @@ export default function TimerQuestion( {questions, time, isPaused, setIsPaused} 
   const [progress, setProgress] = React.useState(100);
 
   React.useEffect(() => {
-    let intervalId;
-    if (isPaused) {
-      intervalId = setInterval(() => {
-        setProgress((prevProgress) =>
-          prevProgress > 0 ? prevProgress - 1 : prevProgress
-        );
-      }, time * 10);
-    }
-    return () => clearInterval(intervalId);
+    console.log('buzzTimer progress: ', time / 7.0)
+    setProgress(time / 7.0 * 100)
   }, [time, isPaused]);
 
   const secondsLeft = Math.round((progress * time) / 100);

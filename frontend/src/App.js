@@ -241,7 +241,7 @@ function App() {
 
                 return ( 
                   <div>
-                    {scroll ? <Timer questions={questions} time={questionTimer} isPaused={!scroll} /> : <TimerQuestion questions={questions} time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
+                    {!buzzed ? <Timer questions={questions} time={questionTimer} isPaused={!scroll} /> : <TimerQuestion questions={questions} time={buzzTimer} isPaused={!scroll} setIsPaused={setScroll}/>}
                     <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}/>
                     {currentBuzzes.map(buzz => <Card className="guessBuzz"><CardContent>{buzz.message}</CardContent></Card>)}
                   </div>

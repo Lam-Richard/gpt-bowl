@@ -10,24 +10,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 
 export default function Timer( {questions, time, isPaused} ) {
   const [progress, setProgress] =useState(100);
-  
 
-  useEffect(() => {
-    let intervalId;
-    console.log("isPaused: ", isPaused);
-    if (!isPaused && questions.length > 0) {
-      intervalId = setInterval(() => {
-        if (time <= 0) {
-            clearInterval(intervalId);
-            return;
-        }
-      }, 1000);
-    }
-    return () => clearInterval(intervalId);
-  }, [questions, time, isPaused]);
-
-  
-  
 
   useEffect(() => {
     const newProgress = (time / 20) * 100; // calculate the new progress based on the remaining time
