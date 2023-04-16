@@ -17,17 +17,23 @@ import TimerQuestion from './Components/TimerQuestion';
 
 const QUESTION_DURATION = 20;
 
-function generateRandomString(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
+const colors = ["red", "blue", "green", "yellow", "orange", "purple", "pink", "black", "white", "gray"];
+const nonColorAdjectives = ["fuzzy", "sparkling", "dazzling", "brave", "witty", "fierce", "cunning", "wild", "hilarious", "clever"];
+const animals = ["panda", "giraffe", "koala", "squirrel", "lion", "tiger", "elephant", "rhino", "zebra", "kangaroo"];
+
+function generateRandomString() {
+  const colorIndex = Math.floor(Math.random() * colors.length);
+  const nonColorAdjectiveIndex = Math.floor(Math.random() * nonColorAdjectives.length);
+  const animalIndex = Math.floor(Math.random() * animals.length);
+  const color = colors[colorIndex];
+  const nonColorAdjective = nonColorAdjectives[nonColorAdjectiveIndex];
+  const animal = animals[animalIndex];
+  return `${color}-${nonColorAdjective}-${animal}`;
 }
 
+
 const socket = openSocket('http://localhost:3000', {rejectUnauthorized: false, transports: ['websocket']});
-const id = generateRandomString(10);
+const id = generateRandomString();
 
 function App() {
 
@@ -81,7 +87,7 @@ function App() {
         setCanGuess(true);  
       }
     })
-  }, [canGuess]);
+  }, [canGuess, scroll]);
 
   useEffect(() => {
     socket.on('confirmGuess', (payload) => {
@@ -96,7 +102,7 @@ function App() {
         console.log("Set to Wrong")
       }
 
-      setCurrentBuzzes([{message: `}${payload.id}: ${payload.guess} (${payload.isCorrect})`}, ...currentBuzzes]);
+      setCurrentBuzzes([{message: `${payload.id}: ${payload.guess} (${payload.isCorrect})`}, ...currentBuzzes]);
     })
   }, [correct, currentBuzzes])
 
@@ -136,10 +142,10 @@ function App() {
 
   useEffect(() => {
       socket.on('startScroll', (payload) => {
-        setScroll(true)
+        setScroll(true);
         console.log("Can scroll now!");
     })
-  })
+  }, [])
 
   const nextQuestion = (payload) => {
     socket.emit("getNextQuestion", payload);
@@ -210,11 +216,7 @@ function App() {
             Guess
           </Button>
 
-          <Typography 
-            style={{height: "25px", width: "160px"}}>
-            Remaining Time: {timer}
-          </Typography>
-         
+
 
         </div>
 
@@ -222,15 +224,6 @@ function App() {
 
         {/* Log should be scrollable in the future */}
         <div className="log">
-        <div style={{height: "25px", display: "flex", justifyContent: "center", marginTop: "15px"}}>
-            {answered ?
-              (correct ? 
-                <h2>Correct!</h2> : 
-                <h2>Wrong</h2>) :
-              ""
-            }
-            
-        </div>
           {questions.map((q_a, index) =>
             {
               console.log("Index: ", index);
@@ -240,13 +233,13 @@ function App() {
                   <div>
                     {scroll ? <Timer questions={questions} time={timer} isPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion questions={questions} time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
                     <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}/>
-                    {currentBuzzes.map(buzz => <div>{buzz.message}</div>)}
+                    {currentBuzzes.map(buzz => <div className="guessBuzz">{buzz.message}</div>)}
                   </div>
                 )
               } else {
                 // Style this differently
                 
-                return <Card className="grayed-out gray-card" style={{ fontFamily: 'Nunito'}}><CardContent>{q_a.question} <br/><br/> {q_a.answer}</CardContent></Card>
+                return <Card className="grayed-out gray-card" ><CardContent>{q_a.question} <br/><br/> {q_a.answer}</CardContent></Card>
               }
             }
           )}

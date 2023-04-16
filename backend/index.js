@@ -10,11 +10,10 @@ const io = socketIO(http, {
     }
 });
 const gpt = require('./gpt.js');
-
 const firestore = require('./firebase.js');
 
-const QUESTION_DURATION = 20
-let paused = false
+const QUESTION_DURATION = 20;
+let paused = false;
 
 async function getQuestion() {
     let coin = Math.random();
@@ -40,25 +39,6 @@ async function getQuestion() {
         }
     }
 }
-
-
-// when the length of buzzing_queue changes, fire an event (allow guess or something). 
-
-
-// "Next Question" event: tell the server to give the clients a question (scrolling) [Done]
-
-// "Buzz" event: enqueue a "buzz," which should allow the user to submit a guess, and stop the scrolling
-
-// "Stop Question" event: stop the question from scrolling
-
-// "Start Timer" event: have the timer for guesses going
-
-// "Reset Timer" event: in the case that the person is wrong
-
-// "Guess Events"
-
-
-// All socket.on events should receive a "payload object"
 
 app.use(cors());
 

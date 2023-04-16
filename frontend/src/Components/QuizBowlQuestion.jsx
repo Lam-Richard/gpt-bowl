@@ -44,7 +44,7 @@ function QuizBowlQuestion({ question, scroll, setScroll }) {
 
   React.useEffect(() => {
     function handleKeyPress(event) {
-      if (event.code === "Space") {
+      if (event.code === "Space" && scroll) {
         event.preventDefault();
         setScroll(!scroll);
         console.log('buzzed');
