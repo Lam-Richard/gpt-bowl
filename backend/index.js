@@ -10,7 +10,6 @@ const io = socketIO(http, {
     }
 });
 const gpt = require('./gpt.js');
-
 const firestore = require('./firebase.js');
 
 
@@ -106,25 +105,6 @@ async function getQuestion() {
     }
 }
 
-
-// when the length of buzzing_queue changes, fire an event (allow guess or something). 
-
-
-// "Next Question" event: tell the server to give the clients a question (scrolling) [Done]
-
-// "Buzz" event: enqueue a "buzz," which should allow the user to submit a guess, and stop the scrolling
-
-// "Stop Question" event: stop the question from scrolling
-
-// "Start Timer" event: have the timer for guesses going
-
-// "Reset Timer" event: in the case that the person is wrong
-
-// "Guess Events"
-
-
-// All socket.on events should receive a "payload object"
-
 app.use(cors());
 
 const PORT = 3000;
@@ -211,6 +191,12 @@ io.on('connection', (socket) => {
         buzzTimer.startTimer()
     })
 
+
+    socket.on('getUsers', (payload) => {
+        let all_users = Object.keys(users)
+        console.log("All Users: ", all_users);
+        io.to(payload.roomCode).emit('receiveUsers', {users: all_users.filter(user => users[user] == payload.roomCode)})
+    })
 
     socket.on('disconnect', () => {
         console.log('Client disconnected');

@@ -9,6 +9,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Timer from './Components/Timer';
 import TimerQuestion from './Components/TimerQuestion';
+import TextField from '@mui/material/TextField';
 
 
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -17,17 +18,23 @@ import TimerQuestion from './Components/TimerQuestion';
 
 const QUESTION_DURATION = 20;
 
-function generateRandomString(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
+const colors = ["red", "blue", "green", "yellow", "orange", "purple", "pink", "black", "white", "gray"];
+const nonColorAdjectives = ["fuzzy", "sparkling", "dazzling", "brave", "witty", "fierce", "cunning", "wild", "hilarious", "clever"];
+const animals = ["panda", "giraffe", "koala", "squirrel", "lion", "tiger", "elephant", "rhino", "zebra", "kangaroo"];
+
+function generateRandomString() {
+  const colorIndex = Math.floor(Math.random() * colors.length);
+  const nonColorAdjectiveIndex = Math.floor(Math.random() * nonColorAdjectives.length);
+  const animalIndex = Math.floor(Math.random() * animals.length);
+  const color = colors[colorIndex];
+  const nonColorAdjective = nonColorAdjectives[nonColorAdjectiveIndex];
+  const animal = animals[animalIndex];
+  return `${color}-${nonColorAdjective}-${animal}`;
 }
 
+
 const socket = openSocket('http://localhost:3000', {rejectUnauthorized: false, transports: ['websocket']});
-const id = generateRandomString(10);
+const id = generateRandomString();
 
 function App() {
 
@@ -100,7 +107,7 @@ function App() {
         setCanGuess(true);  
       }
     })
-  }, [canGuess]);
+  }, [canGuess, scroll]);
 
   useEffect(() => {
     socket.on('confirmGuess', (payload) => {
@@ -115,7 +122,7 @@ function App() {
         console.log("Set to Wrong")
       }
 
-      setCurrentBuzzes([{message: `}${payload.id}: ${payload.guess} (${payload.isCorrect})`}, ...currentBuzzes]);
+      setCurrentBuzzes([{message: `${payload.id}: ${payload.guess} (${payload.isCorrect})`}, ...currentBuzzes]);
     })
   }, [correct, currentBuzzes])
 
@@ -145,10 +152,10 @@ function App() {
 
   useEffect(() => {
       socket.on('startScroll', (payload) => {
-        setScroll(true)
+        setScroll(true);
         console.log("Can scroll now!");
     })
-  })
+  }, [])
 
   const nextQuestion = (payload) => {
     socket.emit("getNextQuestion", payload);
@@ -167,6 +174,7 @@ function App() {
       <Heading/>
 
         <div className="guessbar">
+
           <Button 
             style={{height: "25px", width: "50px"}}
             onClick={() => {
@@ -218,7 +226,6 @@ function App() {
             style={{height: "25px", width: "160px"}}>
             Remaining Time: {buzzed ? buzzTimer : questionTimer}
           </Typography>
-         
 
         </div>
 
@@ -226,15 +233,6 @@ function App() {
 
         {/* Log should be scrollable in the future */}
         <div className="log">
-        <div style={{height: "25px", display: "flex", justifyContent: "center", marginTop: "15px"}}>
-            {answered ?
-              (correct ? 
-                <h2>Correct!</h2> : 
-                <h2>Wrong</h2>) :
-              ""
-            }
-            
-        </div>
           {questions.map((q_a, index) =>
             {
               console.log("Index: ", index);
@@ -244,13 +242,13 @@ function App() {
                   <div>
                     {scroll ? <Timer questions={questions} time={questionTimer} isPaused={!scroll} /> : <TimerQuestion questions={questions} time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
                     <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}/>
-                    {currentBuzzes.map(buzz => <div>{buzz.message}</div>)}
+                    {currentBuzzes.map(buzz => <Card className="guessBuzz"><CardContent>{buzz.message}</CardContent></Card>)}
                   </div>
                 )
               } else {
                 // Style this differently
                 
-                return <Card className="grayed-out gray-card" style={{ fontFamily: 'Nunito'}}><CardContent>{q_a.question} <br/><br/> {q_a.answer}</CardContent></Card>
+                return <Card className="grayed-out gray-card" sx={{ padding: '10px' }}><CardContent>{q_a.question} <br/><br/> {q_a.answer}</CardContent></Card>
               }
             }
           )}
@@ -261,10 +259,20 @@ function App() {
 
 
       <div className="side">
-          <div>Users in the Room: </div>
-          <ol>
-            {users.map(user => <li>{user}</li>)}
-          </ol>
+          {/* <div className="bold">Users in the Room: </div> */}
+          <Card className="bold" sx={{ textAlign: 'center', bgcolor: 'darkgreen',  borderTopLeftRadius: 25, borderTopRightRadius: 25, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
+            <CardContent sx={{ color: 'white' }}>
+              Users in the Room:
+            </CardContent>
+          </Card>
+          <Card sx={{ textAlign: 'center', borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomLeftRadius: 25, borderBottomRightRadius: 25 }}>
+            <CardContent>
+              <ol>
+                {users.map(user => <li>{user}</li>)}
+              </ol>
+            </CardContent>
+          </Card>
+          
       </div>
     </div>
   )

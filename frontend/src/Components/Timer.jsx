@@ -39,9 +39,10 @@ export default function Timer( {questions, time, isPaused} ) {
   
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', marginY: '1rem' }}>
       <Box sx={{ width: '100%', mr: 1 }}>
-        <LinearProgress variant="determinate" value={progress} />
+        <LinearProgress variant="determinate" value={progress} sx={{ height: '15px', borderRadius: '10px', bgcolor: 'pink', '& .MuiLinearProgress-bar': {
+      backgroundColor: 'purple' }}}/>
       </Box>
       <Box sx={{ minWidth: 35 }}>
         <Typography variant="body2" color="text.secondary">

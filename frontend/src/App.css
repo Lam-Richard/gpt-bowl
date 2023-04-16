@@ -1,3 +1,6 @@
+* {
+  font-family: 'Nunito';
+}
 .grid-container {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -25,6 +28,8 @@
   grid-row: 1 / 2;
   background-color: rgba(0,255,0, 0.2);
   border-radius: 25px;
+  padding: 25px;
+  font-family: 'Nunito'
 }
 
 .log {
@@ -46,6 +51,12 @@
   margin-right: 2%;
 }
 
+.guessBuzz {
+  border: 1px solid black;
+  background-color: white;
+  margin-top: 1%;
+}
+
 .guessbar {
   display: flex;
   flex-flow: row wrap;
@@ -54,6 +65,9 @@
   margin-top: 1%;
   margin-left: 5%;
   margin-right: 5%;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
 
 }
 
@@ -77,4 +91,13 @@ input {
 
 .active-card {
   padding:20px;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+
+.guessBuzz {
+  font-weight: bold;
 }
