@@ -29,13 +29,6 @@ function TypingAnimation({ text, isPaused }) {
 
 function QuizBowlQuestion({ question, scroll, setScroll }) {
   const [showQuestion, setShowQuestion] = React.useState(false);
-  // const handleBuzz = () => {
-  //   setScroll(!scroll);
-  //   console.log('buzzed');
-  //   console.log('scroll:', scroll);
-  //   handleTimerChange(time);
-  // }
-
   const handleShowQuestion = () => {
     if (showQuestion === false) {
       setShowQuestion(!showQuestion);
