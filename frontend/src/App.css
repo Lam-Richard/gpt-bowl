@@ -17,12 +17,14 @@
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+  border-radius: 25px;
 }
 
 .side {
   grid-column: 2 / 3;
   grid-row: 1 / 2;
   background-color: rgba(0,255,0, 0.2);
+  border-radius: 25px;
 }
 
 .log {
