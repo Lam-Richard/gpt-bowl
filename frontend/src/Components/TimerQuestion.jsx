@@ -31,22 +31,15 @@ export default function TimerQuestion( {questions, time, isPaused, setIsPaused} 
   }, [progress, setIsPaused]);
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', marginY: '1rem' }}>
       <Box sx={{ width: '100%', mr: 1 }}>
-        <LinearProgress variant="determinate" value={progress} />
+        <LinearProgress variant="determinate" value={progress} sx={{ height: '15px', borderRadius: '10px', bgcolor: 'pink', '& .MuiLinearProgress-bar': {
+      backgroundColor: 'green' }}}/>
       </Box>
       <Box sx={{ minWidth: 35 }}>
         <Typography variant="body2" color="text.secondary">
           {secondsLeft}s
         </Typography>
-      </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <IconButton>
-          <SkipNextIcon />
-        </IconButton>
-        <IconButton>
-          <PauseIcon />
-        </IconButton>
       </Box>
     </Box>
   );
