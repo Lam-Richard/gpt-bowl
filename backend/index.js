@@ -11,35 +11,10 @@ const io = socketIO(http, {
 });
 const gpt = require('./gpt.js')
 
-/*
-
-    Message formats:
-
-    Buzz: {Person: , Room Code: }
-        - Stops reading, starts timer, if timer runs out before GUESS is emitted by the same user, keep reading
-    Guess: {Person: , Message: }
-        - Matches the guess using algorithm, if not correct, update points, keep reading
-    
-    Correct?: {Bool}
-
-
-    Ask: {}
-        If a question was answered correctly, we need to emit another question
-    
-
-*/
-
-// as clients join, give them an identifier on the front and back and add it here
-let users = [];
-
-
-// as they buzz, add to the queue
-let buzzing_queue = [];
-
 // when the length of buzzing_queue changes, fire an event (allow guess or something). 
 
 
-// "Next Question" event: tell the server to give the clients a question (scrolling)
+// "Next Question" event: tell the server to give the clients a question (scrolling) [Done]
 
 // "Buzz" event: enqueue a "buzz," which should allow the user to submit a guess, and stop the scrolling
 
@@ -52,7 +27,7 @@ let buzzing_queue = [];
 // "Guess Events"
 
 
-
+// All socket.on events should receive a "payload object"
 
 app.use(cors());
 
@@ -61,32 +36,100 @@ const PORT = 3000;
 app.get('/', (req, res) => {
     res.send('Server is up and running');
   });
+
+
+// as clients join, give them an identifier on the front and back and add it here
+let users = {};
+let already_timing = false;
+
+// Create a proxy for the array
+const buzzingQueue = new Proxy([], {
+    // Trap for set
+    set(target, prop, value) {
+      // Add the item to the array
+      Reflect.set(target, prop, value);
+      // If the array is not empty, start the timer
+      if (target.length > 0 && already_timing == false) {
+        already_timing = true;
+        console.log(`Emitting to room ${users[buzzingQueue.slice(-1)]}`)
+        io.to(users[buzzingQueue.slice(-1)]).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
+        startTimer();
+      }
+      return true;
+    },
+    // Trap for deleteProperty
+    deleteProperty(target, prop) {
+      // Delete the property from the array
+      Reflect.deleteProperty(target, prop);
+      // If the array is not empty, start the timer
+      if (target.length > 1) {
+        already_timing = true;
+        io.to(users[buzzingQueue.slice(-1)]).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
+        startTimer();
+      } else {
+        already_timing = false;
+      }
+      return true;
+    },
+  });
+  
+  // Define the timer function
+  function startTimer() {
+    let count = 1;
+    console.log("Queue at timer start: ", buzzingQueue);
+    const intervalId = setInterval(() => {
+      console.log(`Count: ${count}`);
+      count++;
+      if (count > 10) {
+        clearInterval(intervalId);
+        // Pop the first item from the array when the timer completes
+        console.log("Start scroll!!!")
+        io.to(users[buzzingQueue.slice(-1)]).emit("startScroll", {message_type: "startScroll", id: buzzingQueue.slice(-1)})
+        
+        buzzingQueue.pop();
+
+
+        console.log("Queue at timer end: ", buzzingQueue);
+
+      }
+    }, 1000);
+  }
+  
+
+  
+
   
 io.on('connection', (socket) => {
-console.log('New client connected');
 
-    socket.on('joinRoom', (roomCode) => {
-        socket.join(roomCode);
-        console.log(`User joined room ${roomCode}`);
+    console.log("A new client has connected to the server.")
+
+    socket.on('joinRoom', (payload) => {
+        socket.join(payload.roomCode);
+        // For later use...!
+        users[payload.id] = payload.roomCode;
+
+        console.log("Users in the room: ", payload.id);
+        console.log(`User ${payload.id} joined room ${payload.roomCode}`);
     });
 
-    socket.on('buzz', (payload, roomCode) => {
-       
+    socket.on('getNextQuestion', async (payload) => {
+        let q_a = await gpt.generateQuestion("Science");
+        io.to(payload.roomCode).emit('postNextQuestion', q_a);
     })
 
-
-    socket.io('nextQuestion', () => {
-        
+    socket.on('sendBuzz', (payload) => {
+        // This can be anything...?
+        buzzingQueue.unshift(payload.id);
     })
-    
 
-    socket.on('message', (payload, roomCode) => {
-        io.to(roomCode).emit('message', payload);
-    });
 
     socket.on('disconnect', () => {
         console.log('Client disconnected');
     });
+
+    
+
+
 });
 
 http.listen(3000, () => {

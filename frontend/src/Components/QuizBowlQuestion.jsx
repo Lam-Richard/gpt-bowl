@@ -29,17 +29,13 @@ function TypingAnimation({ text, isPaused }) {
   return <div>{typedText}</div>;
 }
 
-function QuizBowlQuestion({ question, time, handleTimerChange={handleTimerChange} }) {
-  const [isPaused, setIsPaused] = React.useState(false);
+function QuizBowlQuestion({ question, scroll, setScroll, time, handleTimerChange={handleTimerChange} }) {
   const [showQuestion, setShowQuestion] = React.useState(false);
   const handleBuzz = () => {
-    if (!isPaused) {
-      setIsPaused(!isPaused);
-      console.log('buzzed');
-      console.log('isPaused:', !isPaused);
-      handleTimerChange(time);
-    }
-    
+    setScroll(!scroll);
+    console.log('buzzed');
+    console.log('scroll:', scroll);
+    handleTimerChange(time);
   }
 
   const handleShowQuestion = () => {
@@ -52,28 +48,30 @@ function QuizBowlQuestion({ question, time, handleTimerChange={handleTimerChange
     function handleKeyPress(event) {
       if (event.code === "Space") {
         event.preventDefault();
-        setIsPaused(!isPaused);
+        setScroll(!scroll);
         console.log('buzzed');
-        console.log('isPaused:', !isPaused);
+        console.log('isPaused:', scroll);
       }
     }
     document.addEventListener('keydown', handleKeyPress);
     return () => {
       document.removeEventListener('keydown', handleKeyPress);
     };
-  }, [isPaused]);
+  });
 
   return (
     <div>
+
     <Card variant="outlined">
       <CardContent>
         <h2>Question:</h2>
-        {showQuestion ? <div>{question}</div> : <TypingAnimation text={question} isPaused={isPaused} />}
+        {showQuestion ? <div>{question}</div> : <TypingAnimation text={question} isPaused={!scroll} />}
         {isPaused ? <TimerQuestion time={7} isPaused={isPaused} setIsPaused={setIsPaused}/> : <Timer time={time} isPaused={isPaused} handleTimerChange={handleTimerChange}/>}
       </CardContent>
     </Card>
     <Button onClick={handleBuzz}>Buzz</Button>
     <Button onClick={handleShowQuestion}>Show Question</Button>
+
     </div>
     
   );

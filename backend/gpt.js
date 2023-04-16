@@ -54,6 +54,7 @@ async function generateQuestion(topic) {
     return {
         question: generatedQuestion,
         answer: generatedAnswer,
+        message_type: "q_a"
     }
   }
   else {
