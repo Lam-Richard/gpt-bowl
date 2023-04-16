@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import openSocket from 'socket.io-client';
 import "./App.css";
+import QuizBowlQuestion from './Components/QuizBowlQuestion'
+// import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 const socket = openSocket('http://localhost:3000', {rejectUnauthorized: false, transports: ['websocket']});
 
@@ -74,6 +76,7 @@ function App() {
 
 
   return (
+
     <div className="grid-container">
       <div className="main">
         <div className="guessbar">
@@ -96,6 +99,7 @@ function App() {
             }>
             Buzz
           </button>
+
 
           <input 
             value={guess} 
