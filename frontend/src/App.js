@@ -7,6 +7,8 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import Timer from './Components/Timer';
+import TimerQuestion from './Components/TimerQuestion';
 
 
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -137,8 +139,10 @@ function App() {
   return (
 
     <div className="grid-container">
+      {scroll ? <Timer time={timer} IsPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
       <div className="main">
       <Heading/>
+      {/* {scroll ? <Timer time={timer} IsPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion time={7} isPaused={!scroll} setIsPaused={setScroll}/>} */}
         <div className="guessbar">
           <Button 
             style={{height: "25px", width: "50px"}}
@@ -154,8 +158,10 @@ function App() {
             style={{height: "25px", width: "50px"}}
             onClick={() => {
               console.log("Clicking...");
+
               if (questions.length > 0) {
                 sendBuzz({roomCode: roomCode, id: id})
+                handleTimerChange(timer);
               }
             }
             }>
@@ -207,6 +213,7 @@ function App() {
             {
               console.log("Index: ", index);
               if (index == 0) {
+
                 return ( 
                   <div>
                     <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}  time={timer} handleTimerChange={handleTimerChange}/>
