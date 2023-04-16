@@ -8,7 +8,7 @@ import SkipNextIcon from '@mui/icons-material/SkipNext';
 import PauseIcon from '@mui/icons-material/Pause';
 // import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
-export default function Timer( {questions, time, isPaused, handleTimerChange} ) {
+export default function Timer( {questions, time, isPaused} ) {
   const [progress, setProgress] =useState(100);
   
 
@@ -21,12 +21,10 @@ export default function Timer( {questions, time, isPaused, handleTimerChange} ) 
             clearInterval(intervalId);
             return;
         }
-        handleTimerChange((prevTime) => prevTime - 1);
-        console.log(time)
       }, 1000);
     }
     return () => clearInterval(intervalId);
-  }, [questions, time, isPaused, handleTimerChange]);
+  }, [questions, time, isPaused]);
 
   
   
