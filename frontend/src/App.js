@@ -75,9 +75,8 @@ function App() {
     }
   }, [canGuess, timer])
 
-  useEffect(() => {
-    console.log("Timer useEffect: ", timer);
-  }, [timer])
+
+  // useEffect(( ) => { console.log("Timer: ", timer) }, [timer])
 
   useEffect(() => {
     socket.on('postNextQuestion', (q_a) => {
