@@ -11,9 +11,6 @@ const io = socketIO(http, {
 });
 const gpt = require('./gpt.js')
 
-
-
-
 // when the length of buzzing_queue changes, fire an event (allow guess or something). 
 
 
@@ -57,7 +54,6 @@ const buzzingQueue = new Proxy([], {
         console.log(`Emitting to room ${users[buzzingQueue.slice(-1)]}`)
         io.to(users[buzzingQueue.slice(-1)]).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
         startTimer();
-
       }
       return true;
     },
@@ -87,7 +83,11 @@ const buzzingQueue = new Proxy([], {
       if (count > 10) {
         clearInterval(intervalId);
         // Pop the first item from the array when the timer completes
+        console.log("Start scroll!!!")
+        io.to(users[buzzingQueue.slice(-1)]).emit("startScroll", {message_type: "startScroll", id: buzzingQueue.slice(-1)})
+        
         buzzingQueue.pop();
+
 
         console.log("Queue at timer end: ", buzzingQueue);
 

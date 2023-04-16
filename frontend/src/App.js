@@ -26,6 +26,7 @@ function App() {
   const [questions, setQuestions] = useState([]);
   const [canGuess, setCanGuess] = useState(false);
   const [timer, setTimer] = useState(10);
+  const [scroll, setScroll] = useState(true);
 
   const joinRoom = () => {
     console.log(`${id} Joined room ${roomCode}...!`);
@@ -45,11 +46,13 @@ function App() {
   }, []);
 
   useEffect(() => {
-    socket.on('confirmBuzz', (payload) => {
+    socket.on('confirmBuzz', (payload) =>  {
       console.log("Payload id: ", payload.id);
       console.log("My id: ", id);
       if (payload.id == id) {
         console.log("True!")
+        setScroll(false);
+        console.log("Cannot scroll!");
         setCanGuess(true);  
       }
     })
@@ -58,16 +61,17 @@ function App() {
 
   useEffect(() => {
     if (canGuess) {
-      console.log("Can Guess is currently True!");
       const interval = setInterval(() => {
         setTimer(timer - 1);
         if (timer == 0) {
           clearInterval(interval);
-          setTimer(10);
           setCanGuess(false);
         }
       }, 1000);
-
+      return;
+    } else if (timer != 10) {
+      setTimer(10);
+      return;
     }
   }, [canGuess, timer])
 
@@ -81,6 +85,12 @@ function App() {
     })
   }, [questions])
 
+  useEffect(() => {
+      socket.on('startScroll', (payload) => {
+        setScroll(true)
+        console.log("Can scroll now!");
+    })
+  })
 
   const nextQuestion = (payload) => {
     socket.emit("getNextQuestion", payload);
@@ -89,9 +99,6 @@ function App() {
   const sendBuzz = (payload) => {
     socket.emit('sendBuzz', payload);
   }
-
-
-
 
   return (
 
@@ -148,8 +155,11 @@ function App() {
         </div>
         {/* Log should be scrollable in the future */}
         <div className="log">
-          {questions.map(q_a => <div key={q_a.answer} className="current">{q_a.question}</div>)}
+          {questions.map(q_a =>
+            <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll} />
+          )}
         </div>
+        
       </div>
       <div className="side"></div>
     </div>
