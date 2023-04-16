@@ -6,97 +6,137 @@ import QuizBowlQuestion from './Components/QuizBowlQuestion'
 
 const socket = openSocket('http://localhost:3000', {rejectUnauthorized: false, transports: ['websocket']});
 
-document.addEventListener('keydown', (event) => {
-  if (event.key === "Enter") {
-    alert("Hi");
-  }
-})
-
 function App() {
-  const [name, setName] = useState("Initial Value");
-  const [roomCode, setRoomCode] = useState('200');
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [newGuess, setNewGuess] = useState('');
 
+  function generateRandomString(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  }
+
+  const roomCode = 200;
+  const id = generateRandomString(10);
+  const [guess, setGuess] = useState('');
   const [questions, setQuestions] = useState([]);
+  const [canGuess, setCanGuess] = useState(false);
+  const [timer, setTimer] = useState(20);
 
   const joinRoom = () => {
-    console.log("Joined room...!");
-    socket.emit('joinRoom', roomCode);
+    console.log(`${id} Joined room ${roomCode}...!`);
+    socket.emit('joinRoom', {roomCode: roomCode, id: id});
   };
+
+  useEffect(() => {
+    console.log("Guesses: ", guess);
+  }, [guess]);
+  
+  useEffect(() => {
+    console.log("Questions: ", questions);
+  }, [questions]);
 
   useEffect(() => {
     joinRoom();
+    socket.on('confirmBuzz', (payload) => {
+      if (payload.id == id) {
+        setCanGuess(true);  
+      }
+    })
+  }, []);
 
-  }, [])
-
-  const nextQuestion = () => {
-    socket.emit("nextQuestion");
-  }
 
   useEffect(() => {
-    socket.on('message', (message) => {
-      setMessages([...messages, message]);
-    });
-  }, [messages]);
+    if (canGuess) {
+      setTimeout(() => {
+        setInterval(setTimer(timer - 1), 1000);
+      }, 20000)
+    }
+    setTimer(20);
+    setCanGuess(false);
+  }, [canGuess])
+
+  useEffect(() => {
+    socket.on('postNextQuestion', (q_a) => {
+      setQuestions([q_a, ...questions]);
+    })
+  }, [questions])
+
+
+  const nextQuestion = (payload) => {
+    socket.emit("getNextQuestion", payload);
+  }
+
+  const sendBuzz = (payload) => {
+    socket.emit('sendBuzz', payload);
+  }
 
 
 
 
-
-  const sendMessage = () => {
-    socket.emit('message', `From ${name}: ${newMessage}`, roomCode);
-    setNewMessage('');
-    console.log("Sent new message...!");
-  };
-
-  // return (
-  //   <div>
-  //     <div>Name: </div>
-  //     <input value={name} onChange={(e) => setName(e.target.value)}></input>
-
-  //     <input value={roomCode} onChange={(e) => setRoomCode(e.target.value)}></input>
-  //     <button onClick={() => joinRoom()}>Join Room!</button>
-
-  //     <input value={newMessage} onChange={(e) => setNewMessage(e.target.value)}></input>
-  //     <button onClick={() => sendMessage()}>Send Message</button>
-
-  //     <div>
-  //       <ul>
-  //       {messages.map(message => <li>{message}</li>)}
-  //       </ul>
-  //     </div>
-
-  //   </div>
-  // );
   return (
-    // <div className="grid-container">
-    //   <div className="main">
-    //     <div className="guessbar">
-    //       <div>Guess: &nbsp;</div>
-          <div /*style={{ paddingTop: '64px' }}*/>
-            {/* <NavigationBar/> */}
-            <QuizBowlQuestion question={"What is the capital of France? Hint: it has the Eiffel Tower."}/>
-          
+
+    <div className="grid-container">
+      <div className="main">
+        <div className="guessbar">
+          <button 
+            style={{height: "25px", width: "50px"}}
+            onClick={() => {
+              console.log("Clicking...");
+              nextQuestion({roomCode: roomCode})
+            }
+            }>
+            New
+          </button>
+
+          <button 
+            style={{height: "25px", width: "50px"}}
+            onClick={() => {
+              console.log("Clicking...");
+              sendBuzz({roomCode: roomCode, id: generateRandomString(10)})
+            }
+            }>
+            Buzz
+          </button>
+
+
           <input 
-            value={newGuess} 
-            onEnter={() => setNewGuess('')} 
-            onChange={(e) => {setNewGuess(e.target.value)}} 
+            value={guess} 
+            onEnter={() => setGuess('')} 
+            onChange={(e) => {setGuess(e.target.value)}} 
             >
           </input>
-          </div>
-    //     </div>
-    //     {/* Log should be scrollable in the future */}
-    //     <div className="log">
-    //       <div className="current"></div>
-    //       <div className="current"></div>
 
-    //     </div>
-    //   </div>
-    //   <div className="side"></div>
-    // </div>
+          <button 
+            style={{height: "25px", width: "50px"}}
+            onClick={() => {
+              if (canGuess) {
+                console.log("Send my Guess in! This should be a key listener though...");
+              } else {
+                console.log("Can't Guess")
+              }
+            }
+            }>
+            Guess
+          </button>
+
+          <button 
+            style={{height: "25px", width: "160px"}}>
+            Remaining Time: {timer}
+          </button>
+         
+
+        </div>
+        {/* Log should be scrollable in the future */}
+        <div className="log">
+          {questions.map(q_a => <div key={q_a.answer} className="current">{q_a.question}</div>)}
+        </div>
+      </div>
+      <div className="side"></div>
+    </div>
   )
 }
 
 export default App;
+
