@@ -32,6 +32,7 @@ function App() {
 
   const roomCode = 200;
   const [guess, setGuess] = useState('');
+  const [users, setUsers] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [canGuess, setCanGuess] = useState(false);
   const [timer, setTimer] = useState(20);
@@ -53,7 +54,20 @@ function App() {
 
   useEffect(() => {
     joinRoom();
+    getUsers();
+
+    socket.on('receiveUsers', (payload) => {
+      setUsers(payload.users);
+    })
   }, []);
+
+  const getUsers = () => {
+    socket.emit('getUsers', {roomCode: roomCode});
+  }
+
+  useEffect(() => {
+    console.log("Users: ", users);
+  }, [users])
 
   useEffect(() => {
     socket.on('confirmBuzz', (payload) =>  {
@@ -241,7 +255,12 @@ function App() {
 
 
 
-      <div className="side"></div>
+      <div className="side">
+          <div>Users in the Room: </div>
+          <ol>
+            {users.map(user => <li>{user}</li>)}
+          </ol>
+      </div>
     </div>
   )
 }
