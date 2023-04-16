@@ -42,9 +42,7 @@ app.get('/', (req, res) => {
 
 
 // as clients join, give them an identifier on the front and back and add it here
-let users = [];
-
-
+let users = {};
 let already_timing = false;
 
 // Create a proxy for the array
@@ -56,7 +54,10 @@ const buzzingQueue = new Proxy([], {
       // If the array is not empty, start the timer
       if (target.length > 0 && already_timing == false) {
         already_timing = true;
+        console.log(`Emitting to room ${users[buzzingQueue[-1]]}`)
+        io.to(users[buzzingQueue.slice(-1)]).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
         startTimer();
+
       }
       return true;
     },
@@ -67,6 +68,7 @@ const buzzingQueue = new Proxy([], {
       // If the array is not empty, start the timer
       if (target.length > 1) {
         already_timing = true;
+        io.to(users[buzzingQueue.slice(-1)]).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
         startTimer();
       } else {
         already_timing = false;
@@ -82,7 +84,7 @@ const buzzingQueue = new Proxy([], {
     const intervalId = setInterval(() => {
       console.log(`Count: ${count}`);
       count++;
-      if (count > 3) {
+      if (count > 10) {
         clearInterval(intervalId);
         // Pop the first item from the array when the timer completes
         buzzingQueue.pop();
@@ -104,7 +106,7 @@ io.on('connection', (socket) => {
     socket.on('joinRoom', (payload) => {
         socket.join(payload.roomCode);
         // For later use...!
-        users.push(payload.id);
+        users[payload.id] = payload.roomCode;
 
         console.log("Users in the room: ", payload.id);
         console.log(`User ${payload.id} joined room ${payload.roomCode}`);
@@ -118,7 +120,6 @@ io.on('connection', (socket) => {
     socket.on('sendBuzz', (payload) => {
         // This can be anything...?
         buzzingQueue.unshift(payload.id);
-        io.to(payload.roomCode).emit("confirmBuzz", {message_type: "confirm", id: payload.id});
     })
 
 

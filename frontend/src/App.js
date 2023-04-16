@@ -4,25 +4,28 @@ import "./App.css";
 import QuizBowlQuestion from './Components/QuizBowlQuestion'
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+
+function generateRandomString(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
 const socket = openSocket('http://localhost:3000', {rejectUnauthorized: false, transports: ['websocket']});
+const id = generateRandomString(10);
+
 
 function App() {
 
-  function generateRandomString(length) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-  }
 
   const roomCode = 200;
-  const id = generateRandomString(10);
   const [guess, setGuess] = useState('');
   const [questions, setQuestions] = useState([]);
   const [canGuess, setCanGuess] = useState(false);
-  const [timer, setTimer] = useState(20);
+  const [timer, setTimer] = useState(10);
 
   const joinRoom = () => {
     console.log(`${id} Joined room ${roomCode}...!`);
@@ -39,23 +42,38 @@ function App() {
 
   useEffect(() => {
     joinRoom();
+  }, []);
+
+  useEffect(() => {
     socket.on('confirmBuzz', (payload) => {
+      console.log("Payload id: ", payload.id);
+      console.log("My id: ", id);
       if (payload.id == id) {
+        console.log("True!")
         setCanGuess(true);  
       }
     })
-  }, []);
+  }, [canGuess])
 
 
   useEffect(() => {
     if (canGuess) {
-      setTimeout(() => {
-        setInterval(setTimer(timer - 1), 1000);
-      }, 20000)
+      console.log("Can Guess is currently True!");
+      const interval = setInterval(() => {
+        setTimer(timer - 1);
+        if (timer == 0) {
+          clearInterval(interval);
+          setTimer(10);
+          setCanGuess(false);
+        }
+      }, 1000);
+
     }
-    setTimer(20);
-    setCanGuess(false);
-  }, [canGuess])
+  }, [canGuess, timer])
+
+  useEffect(() => {
+    console.log("Timer useEffect: ", timer);
+  }, [timer])
 
   useEffect(() => {
     socket.on('postNextQuestion', (q_a) => {
@@ -94,7 +112,7 @@ function App() {
             style={{height: "25px", width: "50px"}}
             onClick={() => {
               console.log("Clicking...");
-              sendBuzz({roomCode: roomCode, id: generateRandomString(10)})
+              sendBuzz({roomCode: roomCode, id: id})
             }
             }>
             Buzz
