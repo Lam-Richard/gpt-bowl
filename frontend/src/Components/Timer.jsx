@@ -1,4 +1,5 @@
-import * as React from 'react';
+import React, {useEffect, useState} from 'react';
+
 import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -7,12 +8,14 @@ import SkipNextIcon from '@mui/icons-material/SkipNext';
 import PauseIcon from '@mui/icons-material/Pause';
 // import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
-export default function Timer( {time, isPaused, handleTimerChange} ) {
-  const [progress, setProgress] = React.useState(100);
+export default function Timer( {questions, time, isPaused, handleTimerChange} ) {
+  const [progress, setProgress] =useState(100);
+  
 
-  React.useEffect(() => {
+  useEffect(() => {
     let intervalId;
-    if (!isPaused) {
+    console.log("isPaused: ", isPaused);
+    if (!isPaused && questions.length > 0) {
       intervalId = setInterval(() => {
         if (time <= 0) {
             clearInterval(intervalId);
@@ -22,9 +25,12 @@ export default function Timer( {time, isPaused, handleTimerChange} ) {
       }, 1000);
     }
     return () => clearInterval(intervalId);
-  }, [time, isPaused, handleTimerChange]);
+  }, [questions, time, isPaused, handleTimerChange]);
 
-  React.useEffect(() => {
+  
+  
+
+  useEffect(() => {
     const newProgress = (time / 20) * 100; // calculate the new progress based on the remaining time
     setProgress(newProgress);
   }, [time]);
@@ -42,14 +48,6 @@ export default function Timer( {time, isPaused, handleTimerChange} ) {
         <Typography variant="body2" color="text.secondary">
           {secondsLeft}s
         </Typography>
-      </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <IconButton>
-          <SkipNextIcon />
-        </IconButton>
-        <IconButton>
-          <PauseIcon />
-        </IconButton>
       </Box>
     </Box>
   );

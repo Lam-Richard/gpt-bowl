@@ -7,7 +7,7 @@ import SkipNextIcon from '@mui/icons-material/SkipNext';
 import PauseIcon from '@mui/icons-material/Pause';
 // import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
-export default function TimerQuestion( {time, isPaused, setIsPaused} ) {
+export default function TimerQuestion( {questions, time, isPaused, setIsPaused} ) {
   const [progress, setProgress] = React.useState(100);
 
   React.useEffect(() => {
