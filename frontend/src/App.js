@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import openSocket from 'socket.io-client';
 import "./App.css";
+import QuizBowlQuestion from './Components/QuizBowlQuestion'
+// import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 const socket = openSocket('http://localhost:3000', {rejectUnauthorized: false, transports: ['websocket']});
 
@@ -69,26 +71,31 @@ function App() {
   //   </div>
   // );
   return (
-    <div className="grid-container">
-      <div className="main">
-        <div className="guessbar">
-          <div>Guess: &nbsp;</div>
+    // <div className="grid-container">
+    //   <div className="main">
+    //     <div className="guessbar">
+    //       <div>Guess: &nbsp;</div>
+          <div /*style={{ paddingTop: '64px' }}*/>
+            {/* <NavigationBar/> */}
+            <QuizBowlQuestion question={"What is the capital of France? Hint: it has the Eiffel Tower."}/>
+          
           <input 
             value={newGuess} 
             onEnter={() => setNewGuess('')} 
             onChange={(e) => {setNewGuess(e.target.value)}} 
             >
           </input>
-        </div>
-        {/* Log should be scrollable in the future */}
-        <div className="log">
-          <div className="current"></div>
-          <div className="current"></div>
+          </div>
+    //     </div>
+    //     {/* Log should be scrollable in the future */}
+    //     <div className="log">
+    //       <div className="current"></div>
+    //       <div className="current"></div>
 
-        </div>
-      </div>
-      <div className="side"></div>
-    </div>
+    //     </div>
+    //   </div>
+    //   <div className="side"></div>
+    // </div>
   )
 }
 
