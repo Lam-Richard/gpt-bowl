@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import openSocket from 'socket.io-client';
 import "./App.css";
 import QuizBowlQuestion from './Components/QuizBowlQuestion'
+import Heading from './Components/Heading'
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+
+
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 
@@ -25,7 +30,7 @@ function App() {
   const [guess, setGuess] = useState('');
   const [questions, setQuestions] = useState([]);
   const [canGuess, setCanGuess] = useState(false);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(20);
   const [scroll, setScroll] = useState(true);
   const [correct, setCorrect] = useState(false);
   const [answered, setAnswered] = useState(false);
@@ -110,12 +115,17 @@ function App() {
     socket.emit('sendBuzz', payload);
   }
 
+  const handleTimerChange = (newTimer) => {
+    setTimer(newTimer);
+  }
+
   return (
 
     <div className="grid-container">
       <div className="main">
+      <Heading/>
         <div className="guessbar">
-          <button 
+          <Button 
             style={{height: "25px", width: "50px"}}
             onClick={() => {
               console.log("Clicking...");
@@ -123,9 +133,9 @@ function App() {
             }
             }>
             New
-          </button>
+          </Button>
 
-          <button 
+          <Button 
             style={{height: "25px", width: "50px"}}
             onClick={() => {
               console.log("Clicking...");
@@ -133,7 +143,7 @@ function App() {
             }
             }>
             Buzz
-          </button>
+          </Button>
 
 
           <input
@@ -143,7 +153,7 @@ function App() {
             >
           </input>
 
-          <button 
+          <Button 
             style={{height: "25px", width: "50px"}}
             onClick={() => {
               if (canGuess) {
@@ -156,12 +166,12 @@ function App() {
             }
             }>
             Guess
-          </button>
+          </Button>
 
-          <button 
+          <Typography 
             style={{height: "25px", width: "160px"}}>
             Remaining Time: {timer}
-          </button>
+          </Typography>
          
 
         </div>
@@ -177,7 +187,7 @@ function App() {
             
         </div>
           {questions.map(q_a =>
-            <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll} />
+            <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll} time={timer} handleTimerChange={handleTimerChange}/>
           )}
         </div>
         

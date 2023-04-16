@@ -25,11 +25,11 @@ export default function Timer( {time, isPaused, handleTimerChange} ) {
   }, [time, isPaused, handleTimerChange]);
 
   React.useEffect(() => {
-    const newProgress = (time / 30) * 100; // calculate the new progress based on the remaining time
+    const newProgress = (time / 20) * 100; // calculate the new progress based on the remaining time
     setProgress(newProgress);
   }, [time]);
 
-  const secondsLeft = Math.round((progress * 30) / 100);
+  const secondsLeft = Math.round((progress * 20) / 100);
 
   
 
