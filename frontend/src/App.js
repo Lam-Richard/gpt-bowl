@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import openSocket from 'socket.io-client';
 import "./App.css";
-import QuizBowlQuestion from './Components/QuizBowlQuestion'
+import QuizBowlQuestion from './Components/QuizBowlQuestion';
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 const socket = openSocket('http://localhost:3000', {rejectUnauthorized: false, transports: ['websocket']});
@@ -70,15 +70,24 @@ function App() {
 
   //   </div>
   // );
+
+  const [timer, setTimer] = useState(30);
+
+  const handleTimerChange = (newTimer) => {
+    setTimer(newTimer);
+  }
+
   return (
     // <div className="grid-container">
     //   <div className="main">
     //     <div className="guessbar">
     //       <div>Guess: &nbsp;</div>
-          <div /*style={{ paddingTop: '64px' }}*/>
-            {/* <NavigationBar/> */}
-            <QuizBowlQuestion question={"What is the capital of France? Hint: it has the Eiffel Tower."}/>
-          
+          <div>
+            <QuizBowlQuestion
+              question={"What is the capital of France? Hint: it has the Eiffel Tower."}
+              time={timer}
+              handleTimerChange={handleTimerChange}
+            />
           <input 
             value={newGuess} 
             onEnter={() => setNewGuess('')} 
