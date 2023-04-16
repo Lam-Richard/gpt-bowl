@@ -1,5 +1,9 @@
 import * as React from 'react';
 import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Timer from './Timer';
+import TimerQuestion from './TimerQuestion';
 
 function TypingAnimation({ text, isPaused }) {
   const [typedText, setTypedText] = React.useState("");
@@ -25,12 +29,13 @@ function TypingAnimation({ text, isPaused }) {
   return <div>{typedText}</div>;
 }
 
-function QuizBowlQuestion({ question, scroll, setScroll }) {
+function QuizBowlQuestion({ question, scroll, setScroll, time, handleTimerChange }) {
   const [showQuestion, setShowQuestion] = React.useState(false);
   const handleBuzz = () => {
     setScroll(!scroll);
     console.log('buzzed');
     console.log('scroll:', scroll);
+    handleTimerChange(time);
   }
 
   const handleShowQuestion = () => {
@@ -56,8 +61,13 @@ function QuizBowlQuestion({ question, scroll, setScroll }) {
 
   return (
     <div>
-      <h2>Question:</h2>
-      {showQuestion ? <div>{question}</div> : <TypingAnimation text={question} isPaused={!scroll} />}
+      <Card variant="outlined">
+        <CardContent>
+          <h2>Question:</h2>
+          {showQuestion ? <div>{question}</div> : <TypingAnimation text={question} isPaused={!scroll} />}
+          {scroll ? <Timer time={time} IsPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
+        </CardContent>
+      </Card>
       <Button onClick={handleBuzz}>Buzz</Button>
       <Button onClick={handleShowQuestion}>Show Question</Button>
     </div>

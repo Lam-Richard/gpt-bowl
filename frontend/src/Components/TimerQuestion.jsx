@@ -26,7 +26,7 @@ export default function TimerQuestion( {time, isPaused, setIsPaused} ) {
 
   React.useEffect(() => {
     if (progress === 0) {
-      setIsPaused(!isPaused);
+      setIsPaused(prevPaused => !prevPaused);
     }
   }, [progress, setIsPaused]);
 
