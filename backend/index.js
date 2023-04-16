@@ -54,7 +54,7 @@ const buzzingQueue = new Proxy([], {
       // If the array is not empty, start the timer
       if (target.length > 0 && already_timing == false) {
         already_timing = true;
-        console.log(`Emitting to room ${users[buzzingQueue[-1]]}`)
+        console.log(`Emitting to room ${users[buzzingQueue.slice(-1)]}`)
         io.to(users[buzzingQueue.slice(-1)]).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
         startTimer();
 
