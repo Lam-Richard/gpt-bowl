@@ -44,7 +44,7 @@ export default function Timer( {questions, time, isPaused, handleTimerChange} ) 
     <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', marginY: '1rem' }}>
       <Box sx={{ width: '100%', mr: 1 }}>
         <LinearProgress variant="determinate" value={progress} sx={{ height: '15px', borderRadius: '10px', bgcolor: 'pink', '& .MuiLinearProgress-bar': {
-      backgroundColor: 'rgba(0,0,255, 0.2)' }}}/>
+      backgroundColor: 'purple' }}}/>
       </Box>
       <Box sx={{ minWidth: 35 }}>
         <Typography variant="body2" color="text.secondary">

@@ -9,6 +9,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Timer from './Components/Timer';
 import TimerQuestion from './Components/TimerQuestion';
+import TextField from '@mui/material/TextField';
 
 
 // import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -169,52 +170,62 @@ function App() {
       {/* {scroll ? <Timer time={timer} IsPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion time={7} isPaused={!scroll} setIsPaused={setScroll}/>} */}
 
         <div className="guessbar">
-          <Button 
-            style={{height: "25px", width: "50px"}}
-            onClick={() => {
-              console.log("Clicking...");
-              nextQuestion({roomCode: roomCode})
-            }
-            }>
-            New
-          </Button>
+          <div>
+            <div style={{display: "center"}}>
+              <Button 
+                style={{height: "40px", width: "100px", backgroundColor: '#2c3e50'}}
+                onClick={() => {
+                  console.log("Clicking...");
+                  nextQuestion({roomCode: roomCode})
+                }
+                }
+                variant="contained">
+                New
+              </Button>
 
-          <Button 
-            style={{height: "25px", width: "50px"}}
-            onClick={() => {
-              console.log("Clicking...");
+              <Button 
+                style={{height: "40px", width: "100px", backgroundColor: '#2c3e50'}}
+                onClick={() => {
+                  console.log("Clicking...");
 
-              if (questions.length > 0) {
-                sendBuzz({roomCode: roomCode, id: id})
-                handleTimerChange(timer);
-              }
-            }
-            }>
-            Buzz
-          </Button>
+                  if (questions.length > 0) {
+                    sendBuzz({roomCode: roomCode, id: id})
+                    handleTimerChange(timer);
+                  }
+                }
+                }
+                variant="contained">
+                Buzz
+              </Button>
+
+              <Button 
+                style={{height: "40px", width: "100px", backgroundColor: '#2c3e50'}}
+                onClick={() => {
+                  if (canGuess) {
+                    setAnswered(true)
+                    console.log("Send my Guess in! This should be a key listener though...");
+                    socket.emit('makeGuess', {id: id, guess: guess})
+                  } else {
+                    console.log("Can't Guess")
+                  }
+                }
+                }
+                variant="contained">
+                Guess
+              </Button>
+              </div>
 
 
-          <input
-            value={guess} 
-            onEnter={() => setGuess('')} 
-            onChange={(e) => {setGuess(e.target.value)}}
-            >
-          </input>
+              <TextField
+                value={guess} 
+                onEnter={() => setGuess('')} 
+                onChange={(e) => {setGuess(e.target.value)}}
+                label="Guess here..."
+                variant="standard"
+                >
+              </TextField>
+          </div>
 
-          <Button 
-            style={{height: "25px", width: "50px"}}
-            onClick={() => {
-              if (canGuess) {
-                setAnswered(true)
-                console.log("Send my Guess in! This should be a key listener though...");
-                socket.emit('makeGuess', {id: id, guess: guess})
-              } else {
-                console.log("Can't Guess")
-              }
-            }
-            }>
-            Guess
-          </Button>
 
 
 
@@ -233,13 +244,13 @@ function App() {
                   <div>
                     {scroll ? <Timer questions={questions} time={timer} isPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion questions={questions} time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
                     <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}/>
-                    {currentBuzzes.map(buzz => <div className="guessBuzz">{buzz.message}</div>)}
+                    {currentBuzzes.map(buzz => <Card className="guessBuzz"><CardContent>{buzz.message}</CardContent></Card>)}
                   </div>
                 )
               } else {
                 // Style this differently
                 
-                return <Card className="grayed-out gray-card" ><CardContent>{q_a.question} <br/><br/> {q_a.answer}</CardContent></Card>
+                return <Card className="grayed-out gray-card" sx={{ padding: '10px' }}><CardContent>{q_a.question} <br/><br/> {q_a.answer}</CardContent></Card>
               }
             }
           )}
