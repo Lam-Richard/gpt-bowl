@@ -58,22 +58,22 @@ function App() {
 
   useEffect(() => {
     if (canGuess) {
-      console.log("Can Guess is currently True!");
       const interval = setInterval(() => {
         setTimer(timer - 1);
         if (timer == 0) {
           clearInterval(interval);
-          setTimer(10);
           setCanGuess(false);
         }
       }, 1000);
-
+      return;
+    } else if (timer != 10) {
+      setTimer(10);
+      return;
     }
   }, [canGuess, timer])
 
-  useEffect(() => {
-    console.log("Timer useEffect: ", timer);
-  }, [timer])
+
+  // useEffect(( ) => { console.log("Timer: ", timer) }, [timer])
 
   useEffect(() => {
     socket.on('postNextQuestion', (q_a) => {
