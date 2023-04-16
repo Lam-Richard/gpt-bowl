@@ -188,8 +188,16 @@ function App() {
             }
             
         </div>
-          {questions.map(q_a =>
-            <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll} time={timer} handleTimerChange={handleTimerChange}/>
+          {questions.map((q_a, index) =>
+            {
+              console.log("Index: ", index);
+              if (index == 0) {
+                return <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}  time={timer} handleTimerChange={handleTimerChange}/>
+              } else {
+                // Style this differently
+                return <div className="content">{q_a.question}</div>
+              }
+            }
           )}
         </div>
         
