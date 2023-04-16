@@ -65,8 +65,8 @@ async function generateQuestion(topic) {
 // Compares strings by stripping hyphens and whitespace
 // String with alphanumeric characters in the same order are considered similar
 function similarStrings(correct, guess) {
-    const correct_stripped = correct.replace(/ /g, '').replace(/-/g, '').replace(/./g,'')
-    const guess_stripped = guess.replace(/ /g, '').replace(/-/g, '').replace(/./g,'')
+    const correct_stripped = correct.replace(/ /g, '').replace(/-/g, '').replace(/\./g,'').toLowerCase()
+    const guess_stripped = guess.replace(/ /g, '').replace(/-/g, '').replace(/\./g,'').toLowerCase()
     return correct_stripped === guess_stripped
 }
 
