@@ -215,6 +215,7 @@ function App() {
               </Button>
               </div>
 
+              <br/>
 
               <TextField
                 value={guess} 
