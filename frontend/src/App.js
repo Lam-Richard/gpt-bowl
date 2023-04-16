@@ -24,9 +24,7 @@ function generateRandomString(length) {
 const socket = openSocket('http://localhost:3000', {rejectUnauthorized: false, transports: ['websocket']});
 const id = generateRandomString(10);
 
-
 function App() {
-
 
   const roomCode = 200;
   const [guess, setGuess] = useState('');
@@ -36,6 +34,8 @@ function App() {
   const [scroll, setScroll] = useState(true);
   const [correct, setCorrect] = useState(false);
   const [answered, setAnswered] = useState(false);
+  const [currentBuzzes, setCurrentBuzzes] = useState([]);
+
 
   const joinRoom = () => {
     console.log(`${id} Joined room ${roomCode}...!`);
@@ -46,9 +46,6 @@ function App() {
     console.log("Guesses: ", guess);
   }, [guess]);
   
-  useEffect(() => {
-    console.log("Questions: ", questions);
-  }, [questions]);
 
   useEffect(() => {
     joinRoom();
@@ -65,10 +62,11 @@ function App() {
         setCanGuess(true);  
       }
     })
-  }, [canGuess])
+  }, [canGuess]);
 
   useEffect(() => {
-    socket.on('result', (payload) => {
+    socket.on('confirmGuess', (payload) => {
+
       console.log("isCorrect", payload.isCorrect)
       if (payload.isCorrect) {
         setCorrect(true)
@@ -78,10 +76,22 @@ function App() {
         setCorrect(false)
         console.log("Set to Wrong")
       }
+
+      setCurrentBuzzes([{message: `}${payload.id}: ${payload.guess} (${payload.isCorrect})`}, ...currentBuzzes]);
     })
-  })
+  }, [correct, currentBuzzes])
+
+  useEffect(() => {
+    if (correct) {
+      nextQuestion({roomCode: roomCode});
+      setCorrect(false);
+    }
+  }, [correct])
 
 
+  useEffect(() => {
+    console.log("Current Buzzes: ", currentBuzzes);
+  }, [currentBuzzes])
 
   useEffect(() => {
     socket.on("timer", (payload) => {
@@ -90,7 +100,7 @@ function App() {
         setCanGuess(false);
       }
     })
-  })
+  }, [canGuess, timer])
 
   useEffect(() => {
     console.log("Timer useEffect: ", timer);
@@ -99,8 +109,9 @@ function App() {
   useEffect(() => {
     socket.on('postNextQuestion', (q_a) => {
       setQuestions([q_a, ...questions]);
+      setCurrentBuzzes([]);
     })
-  }, [questions])
+  }, [questions, currentBuzzes])
 
   useEffect(() => {
       socket.on('startScroll', (payload) => {
@@ -141,7 +152,9 @@ function App() {
             style={{height: "25px", width: "50px"}}
             onClick={() => {
               console.log("Clicking...");
-              sendBuzz({roomCode: roomCode, id: id})
+              if (questions.length > 0) {
+                sendBuzz({roomCode: roomCode, id: id})
+              }
             }
             }>
             Buzz
@@ -192,7 +205,12 @@ function App() {
             {
               console.log("Index: ", index);
               if (index == 0) {
-                return <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}  time={timer} handleTimerChange={handleTimerChange}/>
+                return ( 
+                  <div>
+                    <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}  time={timer} handleTimerChange={handleTimerChange}/>
+                    {currentBuzzes.map(buzz => <div>{buzz.message}</div>)}
+                  </div>
+                )
               } else {
                 // Style this differently
                 return <div className="content">{q_a.question}</div>
