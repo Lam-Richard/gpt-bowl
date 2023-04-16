@@ -15,6 +15,7 @@ import TimerQuestion from './Components/TimerQuestion';
 
 // Import the functions you need from the SDKs you need
 
+const QUESTION_DURATION = 20;
 
 function generateRandomString(length) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -100,7 +101,7 @@ function App() {
   // Bug has nothing to do with this because it still goes when i turn it off
   useEffect(() => {
     socket.on("timer", (payload) => {
-      setTimer(10 - payload.time);
+      setTimer(QUESTION_DURATION - payload.time);
       if (timer == 0) {
         setCanGuess(false);
       }
