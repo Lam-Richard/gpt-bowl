@@ -12,10 +12,10 @@ export default function TimerQuestion( {questions, time, isPaused, setIsPaused} 
 
   React.useEffect(() => {
     console.log('buzzTimer progress: ', time / 7.0)
-    setProgress(time / 7.0 * 100)
+    let progressValue = (time / 7.0) * 100
+    console.log('progressValue', progressValue)
+    setProgress(progressValue)
   }, [time, isPaused]);
-
-  const secondsLeft = Math.round((progress * time) / 100);
 
   React.useEffect(() => {
     if (progress === 0) {
@@ -31,7 +31,7 @@ export default function TimerQuestion( {questions, time, isPaused, setIsPaused} 
       </Box>
       <Box sx={{ minWidth: 35 }}>
         <Typography variant="body2" color="text.secondary">
-          {secondsLeft}s
+          {time}s
         </Typography>
       </Box>
     </Box>

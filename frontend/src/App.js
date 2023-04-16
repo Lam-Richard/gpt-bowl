@@ -128,7 +128,9 @@ function App() {
 
   useEffect(() => {
     if (correct) {
+      console.log('Getting next question')
       nextQuestion({roomCode: roomCode});
+      socket.emit('endQuestion')
       setCorrect(false);
     }
   }, [correct])

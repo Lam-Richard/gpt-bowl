@@ -35,21 +35,6 @@ function QuizBowlQuestion({ question, scroll, setScroll }) {
     }
   }
 
-  React.useEffect(() => {
-    function handleKeyPress(event) {
-      if (event.code === "Space" && scroll) {
-        event.preventDefault();
-        setScroll(!scroll);
-        console.log('buzzed');
-        console.log('isPaused:', scroll);
-      }
-    }
-    document.addEventListener('keydown', handleKeyPress);
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  });
-
   return (
     <div>
       <Card className="active-card" variant="outlined" sx={{ borderRadius: '16px' }} style={{ boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)' }}>

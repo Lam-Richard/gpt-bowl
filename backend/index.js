@@ -66,7 +66,6 @@ const questionTimer = new Timer('questionTimer', 20, roomCode, () =>
 {
   // Pop the first item from the array when the timer completes
   console.log("Start scroll!!!")
-  io.to(roomCode).emit("timer", {time: 0})
   io.to(roomCode).emit("startScroll", {message_type: "startScroll", id: buzzingQueue.slice(-1)})
 
   buzzingQueue.pop();
@@ -175,11 +174,15 @@ io.on('connection', (socket) => {
         //     answer: "Meiosis"
         // }
 
+        
         completedQuestions.push(q_a)
+        io.to(roomCode).emit("startScroll", {message_type: "startScroll", id: roomCode})
 
         io.to(payload.roomCode).emit('postNextQuestion', q_a);
         questionTimer.resetTimer()
         questionTimer.startTimer()
+      console.log('Socket: end of getNextQuestion')
+
     })
 
     socket.on('sendBuzz', (payload) => {
@@ -188,6 +191,11 @@ io.on('connection', (socket) => {
         questionTimer.pauseTimer()
         buzzTimer.resetTimer()
         buzzTimer.startTimer()
+    })
+
+
+    socket.on('endQuestion', () => {
+      questionTimer.resetTimer()
     })
 
 
