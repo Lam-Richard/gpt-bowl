@@ -76,15 +76,17 @@ const buzzingQueue = new Proxy([], {
   
   // Define the timer function
   function startTimer() {
-    let count = 1;
+    let count = 0;
     console.log("Queue at timer start: ", buzzingQueue);
     const intervalId = setInterval(() => {
       console.log(`Count: ${count}`);
       count++;
-      if (count > 10) {
+      io.to(users[buzzingQueue.slice(-1)]).emit("timer", {time: count})
+      if (count >= 10) {
         clearInterval(intervalId);
         // Pop the first item from the array when the timer completes
         console.log("Start scroll!!!")
+        io.to(users[buzzingQueue.slice(-1)]).emit("timer", {time: 0})
         io.to(users[buzzingQueue.slice(-1)]).emit("startScroll", {message_type: "startScroll", id: buzzingQueue.slice(-1)})
 
         buzzingQueue.pop();
