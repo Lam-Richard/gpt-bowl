@@ -161,6 +161,12 @@ io.on('connection', (socket) => {
     })
 
 
+    socket.on('getUsers', (payload) => {
+        let all_users = Object.keys(users)
+        console.log("All Users: ", all_users);
+        io.to(payload.roomCode).emit('receiveUsers', {users: all_users.filter(user => users[user] == payload.roomCode)})
+    })
+
     socket.on('disconnect', () => {
         console.log('Client disconnected');
     });
