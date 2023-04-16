@@ -257,10 +257,20 @@ function App() {
 
 
       <div className="side">
-          <div>Users in the Room: </div>
-          <ol>
-            {users.map(user => <li>{user}</li>)}
-          </ol>
+          {/* <div className="bold">Users in the Room: </div> */}
+          <Card className="bold" sx={{ textAlign: 'center', bgcolor: 'darkgreen',  borderTopLeftRadius: 25, borderTopRightRadius: 25, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
+            <CardContent sx={{ color: 'white' }}>
+              Users in the Room:
+            </CardContent>
+          </Card>
+          <Card sx={{ textAlign: 'center', borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomLeftRadius: 25, borderBottomRightRadius: 25 }}>
+            <CardContent>
+              <ol>
+                {users.map(user => <li>{user}</li>)}
+              </ol>
+            </CardContent>
+          </Card>
+          
       </div>
     </div>
   )

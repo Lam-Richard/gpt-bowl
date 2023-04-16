@@ -25,6 +25,8 @@
   grid-row: 1 / 2;
   background-color: rgba(0,255,0, 0.2);
   border-radius: 25px;
+  padding: 25px;
+  font-family: 'Nunito'
 }
 
 .log {
@@ -77,4 +79,8 @@ input {
 
 .active-card {
   padding:20px;
+}
+
+.bold {
+  font-weight: bold;
 }
