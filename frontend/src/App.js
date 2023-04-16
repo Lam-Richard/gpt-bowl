@@ -36,7 +36,9 @@ function App() {
   const [users, setUsers] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [canGuess, setCanGuess] = useState(false);
-  const [timer, setTimer] = useState(20);
+  const [questionTimer, setQuestionTimer] = useState(20);
+  const [buzzTimer, setBuzzTimer] = useState(7);
+  const [buzzed, setBuzzed] = useState(false);
   const [scroll, setScroll] = useState(true);
   const [correct, setCorrect] = useState(false);
   const [answered, setAnswered] = useState(false);
@@ -60,6 +62,23 @@ function App() {
     socket.on('receiveUsers', (payload) => {
       setUsers(payload.users);
     })
+
+    socket.on('questionTimer', (payload) => {
+      setQuestionTimer(payload.time)
+      if (payload.time == 0) {
+        setCanGuess(false);
+      }
+    })
+    socket.on('buzzTimer', (payload) => {
+      setBuzzTimer(payload.time)
+      if (payload.time == 0) {
+        setCanGuess(false);
+      }
+    })
+    socket.on('buzzOver', () => {
+      setBuzzed(false)
+    })
+
   }, []);
 
   const getUsers = () => {
@@ -112,27 +131,17 @@ function App() {
     console.log("Current Buzzes: ", currentBuzzes);
   }, [currentBuzzes])
 
-  // Bug has nothing to do with this because it still goes when i turn it off
   useEffect(() => {
-    socket.on("timer", (payload) => {
-      setTimer(QUESTION_DURATION - payload.time);
-      if (timer == 0) {
-        setCanGuess(false);
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    console.log("Timer useEffect: ", timer);
-  }, [timer])
+    console.log("questionTimer: ", questionTimer);
+    console.log("questionTimer: ", buzzTimer);
+  }, [questionTimer, buzzTimer])
 
   useEffect(() => {
     socket.on('postNextQuestion', (q_a) => {
       setQuestions([q_a, ...questions]);
       setCurrentBuzzes([]);
-      setTimer(20);
     })
-  }, [questions, currentBuzzes, timer])
+  }, [questions, currentBuzzes])
 
   useEffect(() => {
       socket.on('startScroll', (payload) => {
@@ -149,10 +158,6 @@ function App() {
     socket.emit('sendBuzz', payload);
   }
 
-  const handleTimerChange = (newTimer) => {
-    setTimer(newTimer);
-  }
-
   return (
 
     <div className="grid-container">
@@ -160,7 +165,6 @@ function App() {
 
 
       <Heading/>
-      {/* {scroll ? <Timer time={timer} IsPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion time={7} isPaused={!scroll} setIsPaused={setScroll}/>} */}
 
         <div className="guessbar">
           <Button 
@@ -176,11 +180,10 @@ function App() {
           <Button 
             style={{height: "25px", width: "50px"}}
             onClick={() => {
-              console.log("Clicking...");
-
+              console.log("Buzzed!");
+              setBuzzed(true)
               if (questions.length > 0) {
                 sendBuzz({roomCode: roomCode, id: id})
-                handleTimerChange(timer);
               }
             }
             }>
@@ -200,6 +203,7 @@ function App() {
             onClick={() => {
               if (canGuess) {
                 setAnswered(true)
+                setBuzzed(false)
                 console.log("Send my Guess in! This should be a key listener though...");
                 socket.emit('makeGuess', {id: id, guess: guess})
               } else {
@@ -212,7 +216,7 @@ function App() {
 
           <Typography 
             style={{height: "25px", width: "160px"}}>
-            Remaining Time: {timer}
+            Remaining Time: {buzzed ? buzzTimer : questionTimer}
           </Typography>
          
 
@@ -238,7 +242,7 @@ function App() {
 
                 return ( 
                   <div>
-                    {scroll ? <Timer questions={questions} time={timer} isPaused={!scroll} handleTimerChange={handleTimerChange}/> : <TimerQuestion questions={questions} time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
+                    {scroll ? <Timer questions={questions} time={questionTimer} isPaused={!scroll} /> : <TimerQuestion questions={questions} time={7} isPaused={!scroll} setIsPaused={setScroll}/>}
                     <QuizBowlQuestion key={q_a.answer} question={q_a.question} scroll={scroll} setScroll={setScroll}/>
                     {currentBuzzes.map(buzz => <div>{buzz.message}</div>)}
                   </div>

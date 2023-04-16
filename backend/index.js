@@ -13,8 +13,73 @@ const gpt = require('./gpt.js');
 
 const firestore = require('./firebase.js');
 
-const QUESTION_DURATION = 20
-let paused = false
+
+class Timer {
+  constructor(emitEvent, startDuration, roomCode, runWhenFinish) {
+      this.emitEvent = emitEvent
+      this.startDuration = startDuration
+      this.time = startDuration
+      this.roomCode = roomCode
+      this.runWhenFinish = runWhenFinish
+      this.interval = setInterval(() => {
+      console.log(this.emitEvent + ": ", this.time)
+      if (!this.paused) {
+        if (this.time > 0) {
+          this.time--;
+          io.to(this.roomCode).emit(this.emitEvent, {time: this.time})
+        }
+        else {
+          this.paused = true;
+          this.runWhenFinish()
+        }
+      }
+    }, 1000)
+    this.paused = true;
+  }
+
+  startTimer() {
+    this.paused = false;
+  }
+
+  pauseTimer() {
+    this.paused = true;
+  }
+
+  resumeTimer() {
+    this.paused = false;
+  }
+
+  resetTimer() {
+    this.time = this.startDuration
+  }
+
+  endTimer() {
+    clearInterval(this.interval)
+  }
+
+  isRunning() {
+    return !this.paused;
+  }
+}
+
+const roomCode = 200;
+const questionTimer = new Timer('questionTimer', 20, roomCode, () =>
+{
+  // Pop the first item from the array when the timer completes
+  console.log("Start scroll!!!")
+  io.to(roomCode).emit("timer", {time: 0})
+  io.to(roomCode).emit("startScroll", {message_type: "startScroll", id: buzzingQueue.slice(-1)})
+
+  buzzingQueue.pop();
+  console.log("Queue at timer end: ", buzzingQueue);
+})
+const buzzTimer = new Timer('buzzTimer', 7, roomCode, () => {
+  questionTimer.resumeTimer()
+  buzzTimer.resetTimer()
+  buzzTimer.pauseTimer()
+  io.to(roomCode).emit('buzzOver')
+})
+
 
 async function getQuestion() {
     let coin = Math.random();
@@ -85,9 +150,8 @@ let buzzingQueue = new Proxy([], {
       // If the array is not empty, start the timer
       if (target.length > 0 && already_timing == false) {
         already_timing = true;
-        console.log(`Emitting to room ${users[buzzingQueue.slice(-1)]}`)
-        io.to(users[buzzingQueue.slice(-1)]).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
-        startTimer();
+        console.log(`Emitting to room ${roomCode}`)
+        io.to(roomCode).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
       }
       return true;
     },
@@ -98,37 +162,13 @@ let buzzingQueue = new Proxy([], {
       // If the array is not empty, start the timer
       if (target.length > 1) {
         already_timing = true;
-        io.to(users[buzzingQueue.slice(-1)]).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
-        startTimer();
+        io.to(roomCode).emit("confirmBuzz", {message_type: "confirm", id: buzzingQueue.slice(-1)});
       } else {
         already_timing = false;
       }
       return true;
     },
   });
-  
-  // Define the timer function
-  function startTimer() {
-    let count = 0;
-    console.log("Queue at timer start: ", buzzingQueue);
-    const intervalId = setInterval(() => {
-      console.log(`Count: ${count}`);
-      if (!paused) {
-        count++;
-        io.to(users[buzzingQueue.slice(-1)]).emit("timer", {time: count})
-        if (count >= QUESTION_DURATION) {
-          clearInterval(intervalId);
-          // Pop the first item from the array when the timer completes
-          console.log("Start scroll!!!")
-          io.to(users[buzzingQueue.slice(-1)]).emit("timer", {time: 0})
-          io.to(users[buzzingQueue.slice(-1)]).emit("startScroll", {message_type: "startScroll", id: buzzingQueue.slice(-1)})
-  
-          buzzingQueue.pop();
-          console.log("Queue at timer end: ", buzzingQueue);
-      }
-      }
-    }, 1000);
-  }
   
 
 io.on('connection', (socket) => {
@@ -145,24 +185,30 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getNextQuestion', async (payload) => {
-        let q_a = await getQuestion();
+      console.log('Socket: getNextQuestion received')
+
+        // let q_a = await getQuestion();
 
 
         // Dummy question & answer to avoid calling GPT API
-        // let q_a = {
-        //     question: "The first step in this process can be further broken down into leptotene, zygotene, and pachytene phases. A common problem during this process is nondisjunction, which leads to conditions such as Klinefelter's Syndrome and Down Syndrome. This process involves two instances of prophase, metaphase, anaphase, and telophase. For 10 points, name this process used to create haploid cells, such as sperm and eggs.",
-        //     answer: "Meiosis"
-        // }
+        let q_a = {
+            question: "The first step in this process can be further broken down into leptotene, zygotene, and pachytene phases. A common problem during this process is nondisjunction, which leads to conditions such as Klinefelter's Syndrome and Down Syndrome. This process involves two instances of prophase, metaphase, anaphase, and telophase. For 10 points, name this process used to create haploid cells, such as sperm and eggs.",
+            answer: "Meiosis"
+        }
 
         completedQuestions.push(q_a)
 
         io.to(payload.roomCode).emit('postNextQuestion', q_a);
+        questionTimer.resetTimer()
+        questionTimer.startTimer()
     })
 
     socket.on('sendBuzz', (payload) => {
         // This can be anything...?
         buzzingQueue.unshift(payload.id);
-        paused = true
+        questionTimer.pauseTimer()
+        buzzTimer.resetTimer()
+        buzzTimer.startTimer()
     })
 
 
@@ -171,9 +217,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('makeGuess', (payload) => {
+        console.log('Socket: makeGuess received')
         const guess = payload.guess
         const correct = completedQuestions.slice(-1)[0].answer
-        paused = false
+        questionTimer.resumeTimer()
+        buzzTimer.pauseTimer()
+        buzzTimer.resetTimer()
         
         const isCorrect = gpt.similarStrings(correct, guess)
         if (isCorrect) {
@@ -198,3 +247,4 @@ http.listen(3000, () => {
 
 // Test for similar strings
 // console.log(gpt.similarStrings('he --..l-- .. lo     ', 'hello'))
+
