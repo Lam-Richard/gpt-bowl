@@ -108,13 +108,13 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getNextQuestion', async (payload) => {
-        let q_a = await gpt.generateQuestion("Science");
+        // let q_a = await gpt.generateQuestion("Science");
 
         // Dummy question & answer to avoid calling GPT API
-        // let q_a = {
-        //     question: "Lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor ",
-        //     answer: "Lorem"
-        // }
+        let q_a = {
+            question: "The first step in this process can be further broken down into leptotene, zygotene, and pachytene phases. A common problem during this process is nondisjunction, which leads to conditions such as Klinefelter's Syndrome and Down Syndrome. This process involves two instances of prophase, metaphase, anaphase, and telophase. For 10 points, name this process used to create haploid cells, such as sperm and eggs.",
+            answer: "Meiosis"
+        }
 
         completedQuestions.push(q_a)
 
