@@ -9,7 +9,34 @@ const io = socketIO(http, {
         methods: ['GET', 'POST']
     }
 });
-const gpt = require('./gpt.js')
+const gpt = require('./gpt.js');
+
+const firestore = require('./firebase.js');
+
+
+async function getQuestion() {
+    let coin = Math.random();
+    console.log("coin: ", coin);
+    if (coin > 0.3) {
+        let q_a = await gpt.generateQuestion("Science");
+        await firestore.writeData(q_a.question, q_a.answer);
+        return {
+            question: q_a.question,
+            answer: q_a.answer,
+            message_type: "q_a"
+        }
+    } else {
+        let data = await firestore.getData();
+        data = Object.values(data);
+        let q_a = data[Math.floor(data.length * Math.random())];
+        return {
+            question: q_a.question,
+            answer: q_a.answer,
+            message_type: "q_a"
+        }
+    }
+}
+
 
 // when the length of buzzing_queue changes, fire an event (allow guess or something). 
 
@@ -34,7 +61,9 @@ app.use(cors());
 const PORT = 3000;
 
 app.get('/', (req, res) => {
+
     res.send('Server is up and running');
+    
   });
 
 
@@ -110,7 +139,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getNextQuestion', async (payload) => {
-        // let q_a = await gpt.generateQuestion("Science");
+        let q_a = await getQuestion();
+
 
         // Dummy question & answer to avoid calling GPT API
         let q_a = {
